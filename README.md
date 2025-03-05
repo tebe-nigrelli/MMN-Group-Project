@@ -2,7 +2,7 @@
 
 Download [Anaconda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html).
 
-See the [Installation_Notebook](Installation_Notebook.ipynb).
+See the [Installation_Notebook](Installation.ipynb).
 
 # Logistical Information
 
