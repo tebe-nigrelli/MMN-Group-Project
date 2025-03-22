@@ -53,3 +53,13 @@ exploration of the limitations of the approach?
 - Clarity of presentation (2 points for report + 2 oral presentation). Is the information communicated clearly and understandably?
 
 You also must submit all code used to perform the analysis.
+
+
+## Dataset structure
+
+Sessions: one experiment, mouse being put on and tested
+`sessions.metadata`
+
+Units: all units recorded on all sessions, area, firing rate, (think of it being each neuron- although it isn't)
+
+Probes: Physical devices, information on location of probes
