@@ -1,2 +1,8 @@
-allendata/
-.DS_Store
+*
+!allendata/
+!.gitignore
+
+!*.tex
+!*.md
+!*.ipynb
+!*.txt
