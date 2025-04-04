@@ -1,0 +1,261 @@
+#+PROPERTY: header-args:python :session *py:neuro-proj* :results value silent :literal t
+
+* Org Babel Setup
+#+begin_src python
+  def assStr (name, literal=True):
+    f = repr if literal else str
+    return name + " = " + f(eval(name))
+#+end_src
+
+#+NAME: message
+#+begin_src elisp :var v=""
+  (message "%s" v)
+#+end_src
+
+#+NAME: ellide_table
+#+begin_src elisp :results value table :hlines yes :var table="" :var ncols=() :var nrows=()
+  (when (eq 'hline (cadr table))
+    (setq table (cddr table)))
+  (cl-flet ((ellide-list (list length &optional (ellision "..."))
+                (if (and length (length> list length))
+                    (append (seq-subseq list 0 (/ length 2))
+                            (list ellision)
+                            (seq-subseq list (- (length list) (/ length 2))))
+                  list)))
+      (mapcar (lambda (row) (if (listp row) (ellide-list row ncols) row))
+              (ellide-list table nrows (make-list (length (car table)) "..."))))
+#+end_src
+
+#+NAME: ennumerate_list
+#+begin_src elisp :results value table :var list="" :var start=0
+  (cl-mapcar #'list (number-sequence start (+ start (length list))) list)
+#+end_src
+
+# FIXME: *this* seems to not actually contain the table column names,
+# so I don't know where those are stored.
+#+NAME: ennumerate_table
+#+begin_src elisp :eval no :results value table :var table="" :var start=0 :var index-name=""
+  (cl-loop with i = (1- start)
+           for startp = t then nil
+           for tail on table
+           collect
+           (cond ((atom (car tail)) (car tail))
+                 ((and startp (eq 'hline (cadr tail)))
+                  (cons index-name (car tail)))
+                 (t (cons (cl-incf i) (car tail)))))
+#+end_src
+
+* Setup
+#+begin_src python
+  from typing import *
+  import pandas as pd
+#+end_src
+
+
+* Download Sessions
+Set ~data_dir~ and ensure it exists.
+#+begin_src python :results replace :return repr(data_dir)
+  from pathlib import Path
+  data_dir: Final[Path] = Path('./data/')
+  data_dir.mkdir(parents=True, exist_ok=True)
+#+end_src
+
+#+RESULTS:
+: PosixPath('data')
+
+Set ~manifest_path~.
+#+begin_src python :results replace :return repr(manifest_path)
+  manifest_path: Final[Path] = data_dir / 'manifest.json'
+#+end_src
+
+#+RESULTS:
+: PosixPath('data/manifest.json')
+
+Create and initialize the project cache object
+#+begin_src python
+  from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProjectCache
+  cache: Final = EcephysProjectCache.from_warehouse(manifest=manifest_path, timeout=30*60)
+#+end_src
+and obtain the sessions
+#+begin_src python :results replace table :return sessions.head()
+  sessions = cache.get_session_table()
+#+end_src
+
+#+RESULTS:
+|        id | published_at         | specimen_id | session_type          | age_in_days | sex | full_genotype                                   | unit_count | channel_count | probe_count | ecephys_structure_acronyms |                                                                                                                       |
+|-----------+----------------------+-------------+-----------------------+-------------+-----+-------------------------------------------------+------------+---------------+-------------+----------------------------+-----------------------------------------------------------------------------------------------------------------------|
+| 715093703 | 2019-10-03T00:00:00Z |   699733581 | brain_observatory_1.1 |       118.0 | M   | Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt   |        884 |          2219 |           6 | array                      | ((CA1 VISrl nan PO LP LGd CA3 DG VISl PoT VISp grey VISpm APN MB VISam) dtype=object)                                 |
+| 719161530 | 2019-10-03T00:00:00Z |   703279284 | brain_observatory_1.1 |       122.0 | M   | Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt   |        755 |          2214 |           6 | array                      | ((TH Eth APN POL LP DG CA1 VISpm nan NOT MB SUB VISp VISam grey VL CA3 CA2 VISl PO VPM LGd VISal VISrl) dtype=object) |
+| 721123822 | 2019-10-03T00:00:00Z |   707296982 | brain_observatory_1.1 |       125.0 | M   | Pvalb-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt |        444 |          2229 |           6 | array                      | ((MB SCig PPT NOT DG CA1 VISam nan LP VIS ProS VISp LGv CA3 VISl APN POL LGd HPF VISal VISrl) dtype=object)           |
+| 732592105 | 2019-10-03T00:00:00Z |   717038288 | brain_observatory_1.1 |       100.0 | M   | wt/wt                                           |        824 |          1847 |           5 | array                      | ((grey VISpm nan VISp VISl VISal VISrl) dtype=object)                                                                 |
+| 737581020 | 2019-10-03T00:00:00Z |   718643567 | brain_observatory_1.1 |       108.0 | M   | wt/wt                                           |        568 |          2218 |           6 | array                      | ((grey VISmma nan VISpm VISp VISl VISrl) dtype=object)                                                                |
+
+Extract the session ids from ~sessions~ into ~session_ids~
+#+begin_src python :results replace table :return session_ids :post ellide_table(ennumerate_list(*this*,1),nrows=5)
+  session_ids: Final[Sequence[int]] = list(sessions.index)
+#+end_src
+
+#+RESULTS:
+
+Extract a single session into ~session~:
+#+begin_src python :results replace table :var session_id=715093703
+  assert session_id in session_ids
+  session = cache.get_session_data(session_id) 
+  session.metadata
+#+end_src
+
+#+RESULTS:
+| specimen_name              | Sst-IRES-Cre;Ai32-386129                                                                                            |                                                   |
+| session_type               | brain_observatory_1.1                                                                                               |                                                   |
+| full_genotype              | Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt                                                                       |                                                   |
+| sex                        | M                                                                                                                   |                                                   |
+| age_in_days                | 118.0                                                                                                               |                                                   |
+| rig_equipment_name         | NP.1                                                                                                                |                                                   |
+| num_units                  | 884                                                                                                                 |                                                   |
+| num_channels               | 2219                                                                                                                |                                                   |
+| num_probes                 | 6                                                                                                                   |                                                   |
+| num_stimulus_presentations | 70388                                                                                                               |                                                   |
+| session_start_time         | datetime.datetime                                                                                                   | (2019 1 19 0 54 18 tzinfo=tzoffset (None -28800)) |
+| ecephys_session_id         | 715093703                                                                                                           |                                                   |
+| structure_acronyms         | (PO PoT LP DG CA1 VISp nan LGd CA3 VISl VISrl grey VISpm VISam APN MB)                                              |                                                   |
+| stimulus_names             | (spontaneous gabors flashes drifting_gratings natural_movie_three natural_movie_one static_gratings natural_scenes) |                                                   |
+
+#+begin_src python :results replace table
+  session.units.head()
+#+end_src
+
+#+RESULTS:
+|   unit_id | waveform_PT_ratio | waveform_amplitude |   amplitude_cutoff | cluster_id | cumulative_drift |          d_prime |      firing_rate |      isi_violations | isolation_distance |              L_ratio | local_index | max_drift |       nn_hit_rate |        nn_miss_rate | peak_channel_id | presence_ratio | waveform_recovery_slope | waveform_repolarization_slope |   silhouette_score |              snr | waveform_spread | waveform_velocity_above | waveform_velocity_below | waveform_duration | filtering                                             | probe_channel_number | probe_horizontal_position |  probe_id | probe_vertical_position | structure_acronym | ecephys_structure_id | ecephys_structure_acronym | anterior_posterior_ccf_coordinate | dorsal_ventral_ccf_coordinate | left_right_ccf_coordinate | probe_description | location                | probe_sampling_rate | probe_lfp_sampling_rate | probe_has_lfp_data |
+|-----------+-------------------+--------------------+--------------------+------------+------------------+------------------+------------------+---------------------+--------------------+----------------------+-------------+-----------+-------------------+---------------------+-----------------+----------------+-------------------------+-------------------------------+--------------------+------------------+-----------------+-------------------------+-------------------------+-------------------+-------------------------------------------------------+----------------------+---------------------------+-----------+-------------------------+-------------------+----------------------+---------------------------+-----------------------------------+-------------------------------+---------------------------+-------------------+-------------------------+---------------------+-------------------------+--------------------|
+| 950910352 | 0.476195823985229 |           106.7859 | 0.0577002132684591 |          6 |           419.57 | 4.57615488349861 | 4.53238525983951 |  0.0297974881766307 |   69.4554048757707 |  0.00201976077414042 |           6 |     34.38 | 0.935531135531136 | 0.00827658459926663 |       850264156 |           0.99 |      -0.153573182082972 |             0.365538850182457 | 0.0808694495213752 | 2.81699321300004 |            60.0 |      -0.137353433835846 |                     0.0 |  0.15108877721943 | AP band: 500 Hz high-pass; LFP band: 1000 Hz low-pass |                    5 |                        11 | 810755797 |                      60 | APN               |                215.0 | APN                       |                            8157.0 |                        3521.0 |                    6697.0 | probeA            | See electrode locations |    29999.9548460456 |       1249.998118585235 | True               |
+| 950910364 | 0.953652093769956 |          85.808775 | 0.0656490932320384 |          7 |           231.42 | 5.60270286224249 | 31.4861610077429 | 0.00599797625184669 |   102.847616328039 | 0.000145517763702519 |           7 |     23.43 | 0.995333333333333 | 0.00278551532033426 |       850264158 |           0.99 |     -0.0100042011576465 |             0.147357429450228 |   0.15349582818368 | 2.59208177886566 |            60.0 |      -0.618090452261306 |       0.343383584589615 | 0.480737018425461 | AP band: 500 Hz high-pass; LFP band: 1000 Hz low-pass |                    6 |                        59 | 810755797 |                      80 | APN               |                215.0 | APN                       |                            8154.0 |                        3513.0 |                    6698.0 | probeA            | See electrode locations |    29999.9548460456 |       1249.998118585235 | True               |
+| 950910371 | 0.615593041442563 |          76.898055 | 0.0155090688075412 |          8 |           209.31 | 5.06181664837398 | 17.3286104480661 | 0.00524179799786349 |   76.9076101091338 |  0.00452207327640793 |           8 |     57.44 | 0.993333333333333 | 0.00797534892151532 |       850264164 |           0.99 |     -0.0714842163134385 |             0.299230611298627 | 0.0892291137533651 | 2.09507665552854 |            70.0 |       0.274706867671692 |       0.137353433835845 | 0.288442211055276 | AP band: 500 Hz high-pass; LFP band: 1000 Hz low-pass |                    9 |                        11 | 810755797 |                     100 | APN               |                215.0 | APN                       |                            8146.0 |                        3487.0 |                    6701.0 | probeA            | See electrode locations |    29999.9548460456 |       1249.998118585235 | True               |
+| 950910392 | 0.616316573121546 |         120.519555 | 0.0258905098078747 |         11 |           179.71 | 4.21907351558411 | 16.2624138846509 |  0.0968838849646007 |   65.6712061608508 |  0.00730606800515631 |          11 |     33.65 |             0.944 | 0.00287425149700599 |       850264172 |           0.99 |       -0.11636453933483 |             0.497248679559723 |  0.139600921828306 | 3.02474406030307 |            70.0 |                     0.0 |      -0.274706867671691 | 0.206030150753769 | AP band: 500 Hz high-pass; LFP band: 1000 Hz low-pass |                   13 |                        11 | 810755797 |                     140 | APN               |                215.0 | APN                       |                            8133.0 |                        3444.0 |                    6707.0 | probeA            | See electrode locations |    29999.9548460456 |       1249.998118585235 | True               |
+| 950910435 | 0.174735271242154 |          66.974895 |  0.010060898694189 |         17 |            99.99 | 6.39305051117063 | 62.3263048854865 | 0.00424330108089726 |   294.002221698336 | 0.000136054380915716 |          17 |     27.84 |               1.0 |  0.0166987797045601 |       850264190 |           0.99 |     -0.0456368683975744 |             0.262593877220322 |  0.146494240369336 | 2.06740640009966 |            90.0 |      -0.068676716917923 |      -0.647523330940416 | 0.206030150753769 | AP band: 500 Hz high-pass; LFP band: 1000 Hz low-pass |                   22 |                        59 | 810755797 |                     240 | APN               |                215.0 | APN                       |                            8110.0 |                        3367.0 |                    6719.0 | probeA            | See electrode locations |    29999.9548460456 |       1249.998118585235 | True               |
+
+#+begin_src python :results replace table
+  session.stimulus_conditions.head()
+#+end_src
+
+#+RESULTS:
+| stimulus_condition_id | temporal_frequency | opacity | stimulus_name | contrast | units | spatial_frequency | mask   | frame | y_position | size         | x_position | color | orientation | phase                          | color_triplet   |
+|-----------------------+--------------------+---------+---------------+----------+-------+-------------------+--------+-------+------------+--------------+------------+-------+-------------+--------------------------------+-----------------|
+|                     0 |               null | null    | spontaneous   |     null | null  |              null | null   | null  |       null | null         |       null | null  |        null | null                           | null            |
+|                     1 |                4.0 | True    | gabors        |      0.8 | deg   |              0.08 | circle | null  |       30.0 | [20.0, 20.0] |        0.0 | null  |        45.0 | [3644.93333333, 3644.93333333] | [1.0, 1.0, 1.0] |
+|                     2 |                4.0 | True    | gabors        |      0.8 | deg   |              0.08 | circle | null  |      -10.0 | [20.0, 20.0] |      -30.0 | null  |         0.0 | [3644.93333333, 3644.93333333] | [1.0, 1.0, 1.0] |
+|                     3 |                4.0 | True    | gabors        |      0.8 | deg   |              0.08 | circle | null  |       20.0 | [20.0, 20.0] |       10.0 | null  |        45.0 | [3644.93333333, 3644.93333333] | [1.0, 1.0, 1.0] |
+|                     4 |                4.0 | True    | gabors        |      0.8 | deg   |              0.08 | circle | null  |      -40.0 | [20.0, 20.0] |      -40.0 | null  |         0.0 | [3644.93333333, 3644.93333333] | [1.0, 1.0, 1.0] |
+
+#+begin_src python :results replace table :colnames '("stimulus_name" "presentation_count")
+  session.stimulus_conditions['stimulus_name'].value_counts()
+#+end_src
+
+#+RESULTS:
+| stimulus_name       | presentation_count |
+|---------------------+--------------------|
+| natural_movie_three |               3600 |
+| natural_movie_one   |                900 |
+| gabors              |                243 |
+| static_gratings     |                121 |
+| natural_scenes      |                119 |
+| drifting_gratings   |                 41 |
+| flashes             |                  2 |
+| spontaneous         |                  1 |
+
+#+begin_src python
+  grouped_stimulus_presentations = session.stimulus_presentations.groupby('stimulus_name')
+#+end_src
+
+#+begin_src python :results replace table :return total_durations.round(1) :colnames '("stimulus_name" "total_duration (s)")
+  total_durations = grouped_stimulus_presentations['duration'].sum()
+#+end_src
+
+#+RESULTS:
+| stimulus_name       | total_duration (s) |
+|---------------------+--------------------|
+| drifting_gratings   |             1257.0 |
+| flashes             |               37.5 |
+| gabors              |              912.0 |
+| natural_movie_one   |              600.5 |
+| natural_movie_three |             1201.0 |
+| natural_scenes      |             1488.8 |
+| spontaneous         |             1237.1 |
+| static_gratings     |             1501.3 |
+
+#+begin_src python :results replace table
+  def presentation_type_spike_times(expr = None, mask = None, unit_names = session.units.index):
+    presentations = session.stimulus_presentations
+    if mask is not None:
+      presentations = presentations[mask]
+    if expr is not None:
+      presentations = presentations.query(expr)
+    return session.presentationwise_spike_times(presentations['stimulus_condition_id'], unit_names)
+
+  presentation_type_spike_times(expr="`stimulus_name` == 'drifting_gratings'").head(10)
+#+end_src
+
+#+RESULTS:
+|         spike_time | stimulus_presentation_id |     unit_id | time_since_stimulus_presentation_onset |
+|--------------------+--------------------------+-------------+----------------------------------------|
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+| 134.82227638240676 |                    246.0 | 950918381.0 |                 0.00039752531912995437 |
+
+#+begin_src python :results replace table :return spike_times_with_presentations_condition_names.head()
+  spike_times_with_presentations_condition_names = \
+    pd.merge(
+      session.presentationwise_spike_times(
+        session.stimulus_presentations['stimulus_condition_id'],
+        session.units.index).reset_index(),
+      session.stimulus_presentations['stimulus_name'],
+      how='left',
+      on='stimulus_presentation_id'
+    )
+#+end_src
+
+#+RESULTS:
+|   |         spike_time | stimulus_presentation_id |   unit_id | time_since_stimulus_presentation_onset | stimulus_name |
+|---+--------------------+--------------------------+-----------+----------------------------------------+---------------|
+| 0 | 13.472999982658951 |                        0 | 950956019 |                  0.0023170459523598197 | spontaneous   |
+| 1 | 13.472999982658951 |                        0 | 950956019 |                  0.0023170459523598197 | spontaneous   |
+| 2 | 13.472999982658951 |                        0 | 950956019 |                  0.0023170459523598197 | spontaneous   |
+| 3 | 13.472999982658951 |                        0 | 950956019 |                  0.0023170459523598197 | spontaneous   |
+| 4 | 13.472999982658951 |                        0 | 950956019 |                  0.0023170459523598197 | spontaneous   |
+
+
+#+begin_src python :results replace table :return pd.concat([spike_times_df.head(10), spike_times_df.tail(10)]) :post ellide_table(*this*, nrows=10) :colnames '("" "unit_id" "spike_time")
+  def get_spike_times_df(unit_ids: Optional[Sequence[int]]=None):
+    return pd.concat((
+      (_df := pd.DataFrame(unit_spike_times, columns=['spike_time']),
+       _df.insert(0,'unit_id',unit_id),
+       _df)[-1]
+      for (unit_id, unit_spike_times) in session.spike_times.items()
+      if unit_ids is None or unit_id in unit_ids
+    ), ignore_index=True, copy=False)
+
+  spike_times_df = get_spike_times_df()
+#+end_src
+
+#+RESULTS:
+|          |     unit_id |         spike_time |
+|----------+-------------+--------------------|
+|        0 | 950910364.0 | 28.843563287317476 |
+|        1 | 950910364.0 | 28.881296682586495 |
+|        2 | 950910364.0 |  28.88569668980868 |
+|      ... |         ... |                ... |
+| 68032066 | 950956952.0 |  9630.812679767207 |
+| 68032067 | 950956952.0 |  9630.834179747115 |
+| 68032068 | 950956952.0 |  9630.852613063224 |
+| 68032069 | 950956952.0 |  9630.872113045003 |
+| 68032070 | 950956952.0 |  9630.907113012297 |
+
+#+begin_src python :results replace table
+  
+#+end_src
