@@ -6,6 +6,14 @@ import typing
 import pandas as pd
 
 class _Constraint():
+  """Base class for constraints.
+
+  Defines two methods:
+    `x in c` :: Returns `True` if `x` satisfies constraint `c`.
+    `c.mask(df)` :: Returns a boolean `pd.Series` of the same length
+                    as the index of `df`, where `True` entries are
+                    rows satisfying constraint `c`.
+  """
   @abstractmethod
   def __contains__(self, obj) -> bool:
     pass
@@ -15,6 +23,11 @@ class _Constraint():
     pass
 
 class _ContainerConstraint(_Constraint):
+  """Convenience class to define `_AndConstraint` and `_OrConstraint`,
+  which both take either an iterable of constraints or some amount of
+  constraints.
+
+  """
   @overload
   def __init__(self, cs: Iterable[_Constraint]): ...
   @overload
@@ -28,6 +41,7 @@ class _ContainerConstraint(_Constraint):
       self.cs = typing.cast(Iterable[_Constraint], cs[0])
   
 class _NotConstraint(_Constraint):
+  """Match object if constraint `c` does not match."""
   def __init__(self, c: _Constraint):
     self.c = c
 
@@ -38,6 +52,7 @@ class _NotConstraint(_Constraint):
     return ~self.c.mask(df)
     
 class _OrConstraint(_ContainerConstraint):
+  """Match object if any constraint `cs` matches."""
   def __init__(self, *cs):
     super().__init__(*cs)
 
@@ -48,6 +63,7 @@ class _OrConstraint(_ContainerConstraint):
     return f.reduce(op.or_, (c.mask(df) for c in self.cs), pd.Series([False]*df.shape[0], index=df.index))
   
 class _AndConstraint(_ContainerConstraint):
+  """Match object if all constraints `cs` matches."""
   def __init__(self, *cs):
     super().__init__(*cs)
 
@@ -58,6 +74,7 @@ class _AndConstraint(_ContainerConstraint):
     return f.reduce(op.and_, (c.mask(df) for c in self.cs), pd.Series([True]*df.shape[0], index=df.index))
   
 class _EqConstraint(_Constraint):
+  """Match object if equal to `obj`."""
   def __init__(self, obj: Any):
     self.obj = obj
 
@@ -68,6 +85,16 @@ class _EqConstraint(_Constraint):
     return df == self.obj
   
 class _RangeConstraint(_Constraint):
+  """Match object if between `lb` and `ub`.
+
+  `lb` and `ub` are the lower and upper bounds respectively.  If
+  either is `None`, then the corresponding direction is unbounded.
+
+  `lb_strict` and `ub_strict` determine whether the corresponding
+  bounds are strict (not matching the bound - a.k.a exclusive) or lax
+  (matching the bound - a.k.a inclusive).
+
+  """
   def __init__(self, lb: None|int|float, ub: None|int|float,
                lb_strict: bool = False,
                ub_strict: bool = True):
@@ -89,6 +116,10 @@ class _RangeConstraint(_Constraint):
       m &= (self.ub > df) if self.ub_strict else (self.ub >= df)
     return m
 
+# The classes NOT, OR, AND, and RANGE are there so we can
+# unambiguously type our constraints, while maintaining
+# context-dependence.
+  
 _T = TypeVar('_T')
 class NOT(Generic[_T]):
   __match_args__ = ("thing",)
@@ -138,11 +169,26 @@ def parse_NumConstraint(c: NumConstraint) -> _Constraint:
       return _AndConstraint(map(parse_NumConstraint, cs))
     case OR(cs) | [*cs]:
       return _OrConstraint(map(parse_NumConstraint, cs))
-  raise Exception(f"Invalid float constraint {c}")
+    case _:
+      typing.assert_never
+      raise Exception(f"Invalid numerical constraint {c}")
 
-StrConstraint: TypeAlias = str | Sequence[str]
+StrConstraint: TypeAlias = str \
+  | Sequence['StrConstraint']  \
+  | NOT['StrConstraint']       \
+  | OR['StrConstraint']        \
+  | AND['StrConstraint']
+  
 def parse_StrConstraint(c: StrConstraint) -> _Constraint:
-  if isinstance(c, str):
-    return _EqConstraint(c)
-  else:
-    return _OrConstraint(map(_EqConstraint, c))
+  match c:
+    case str():
+      return _EqConstraint(c)
+    case NOT(c):
+      return _NotConstraint(parse_StrConstraint(c))
+    case AND(cs):
+      return _AndConstraint(map(parse_StrConstraint, cs))
+    case OR(cs) | [*cs]:
+      return _OrConstraint(map(parse_StrConstraint, cs))
+    case _:
+      typing.assert_never
+      raise Exception(f"Invalid string constraint {c}")
