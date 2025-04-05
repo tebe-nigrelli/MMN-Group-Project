@@ -3,10 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from constraints import (
-  FIELD, NOT, OR, AND, EQ, RANGE, filter_df
-
-)
+from constraints import (FIELD, NOT, OR, AND, EQ, RANGE, filter_df)
 
 RUN_EXAMPLES: Final[bool] = False
 

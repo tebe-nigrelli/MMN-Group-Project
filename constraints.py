@@ -8,7 +8,7 @@ import pandas as pd
 
 """
 
-This module defines the _Constraints class, which is a mechanism by
+This module defines the Constraint class, which is a mechanism by
 which you can define constraints for values.
 
 The following constraints work for all fields:
@@ -135,7 +135,7 @@ and then handle the number case however you want in the `...` section.
 
 """
 
-class _Constraint():
+class Constraint():
   """Base class for constraints.
 
   Defines two methods:
@@ -152,7 +152,7 @@ class _Constraint():
   def mask(self, df: pd.DataFrame|pd.Series) -> pd.Series:
     pass
 
-class _ContainerConstraint(_Constraint):
+class _ContainerConstraint(Constraint):
   """Convenience class to define `_AndConstraint` and `_OrConstraint`,
   which both take either an iterable of constraints or some amount of
   constraints.
@@ -166,11 +166,11 @@ class _ContainerConstraint(_Constraint):
       self.cs = cs[0]
     else:
       self.cs = cs
-    self.cs: Iterable[_Constraint] = map(ensure_constraint, self.cs)
+    self.cs: Iterable[Constraint] = map(ensure_constraint, self.cs)
   
-class NOT(_Constraint):
+class NOT(Constraint):
   """Match object if constraint `c` does not match."""
-  def __init__(self, c: _Constraint):
+  def __init__(self, c: Constraint):
     self.c = ensure_constraint(c)
 
   def __contains__(self, obj):
@@ -211,7 +211,7 @@ class AND(_ContainerConstraint):
       df = df[m_new]
     return m
 
-class EQ(_Constraint):
+class EQ(Constraint):
   """Match object if equal to `obj`."""
   def __init__(self, obj: Any):
     self.obj = obj
@@ -222,7 +222,7 @@ class EQ(_Constraint):
   def mask(self, df):
     return df == self.obj
   
-class RANGE(_Constraint):
+class RANGE(Constraint):
   """Match object if between `lb` and `ub`.
 
   `lb` and `ub` are the lower and upper bounds respectively.  If
@@ -260,10 +260,10 @@ _V2 = TypeVar('_V2')
 def _map_dict(func: Callable[[_V1],_V2], m: dict[_K, _V1]) -> dict[_K, _V2]:
   return {k:func(v) for k,v in m.items()}
   
-class FIELD(_Constraint):
+class FIELD(Constraint):
   """Match object if each of its field matches the corresponding constraint."""
 
-  def __init__(self, **kwargs: Mapping[str,_Constraint|Any]):
+  def __init__(self, **kwargs: Mapping[str,Constraint|Any]):
     self.fields = _map_dict(ensure_constraint, kwargs)
 
   def __contains__(self, obj):
@@ -289,8 +289,8 @@ class FIELD(_Constraint):
       df = df[m]
     return m
 
-def ensure_constraint(x: Any) -> _Constraint:
-  if isinstance(x, _Constraint):
+def ensure_constraint(x: Any) -> Constraint:
+  if isinstance(x, Constraint):
     return x
   if isinstance(x, Mapping):
     return FIELD(**x)
