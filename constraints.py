@@ -13,6 +13,9 @@ which you can define constraints for values.
 
 The following constraints work for all fields:
 
+  EQ(obj)
+    Match things equal to `obj` (`x == obj`) and nothing else.
+
   NOT(constraint)
     Match the current object if `constraint` does not match it.
 
