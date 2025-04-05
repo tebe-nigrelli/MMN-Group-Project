@@ -112,8 +112,23 @@ Examples:
 
   FIELD constraints can be combined together with OR, AND, and NOT as
   well:
+  ```
+    filter_df(CURRENT_SESSION.stimulus_presentations,
+              OR(FIELD(stimulus_name = 'gabors',
+                       stimulus_condition_id = 1),
+                 FIELD(stimulus_name = 'static_gratings',
+                       orientation = AND(NOT(EQ('null')),
+                                         RANGE(30, 60, lb_strict=False, ub_strict=False)))))
+  ```
 
-
+Important note: OR, AND, and FIELD short-circuit; what this means is
+that if you have a column where the value is either the string 'null'
+or a number, you can first make sure that you handle the 'null' case by doing
+```
+  AND(NOT(EQ('null')),
+      ...)
+```
+and then handle the number case however you want in the `...` section.
 
 """
 
@@ -170,7 +185,12 @@ class OR(_ContainerConstraint):
     return any(obj in c for c in self.cs)
 
   def mask(self, df):
-    return f.reduce(op.or_, (c.mask(df) for c in self.cs), pd.Series([False]*df.shape[0], index=df.index))
+    m = pd.Series([False] * df.shape[0], index=df.index)
+    for c in self.cs:
+      m_new = c.mask(df)
+      m |= m_new
+      df = df[~m_new]
+    return m
   
 class AND(_ContainerConstraint):
   """Match object if all constraints `cs` matches."""
@@ -181,7 +201,12 @@ class AND(_ContainerConstraint):
     return all(obj in c for c in self.cs)
 
   def mask(self, df):
-    return f.reduce(op.and_, (c.mask(df) for c in self.cs), pd.Series([True]*df.shape[0], index=df.index))
+    m = pd.Series([True]*df.shape[0], index=df.index)
+    for c in self.cs:
+      m_new = c.mask(df)
+      m &= m_new
+      df = df[m_new]
+    return m
 
 class EQ(_Constraint):
   """Match object if equal to `obj`."""
@@ -249,9 +274,17 @@ class FIELD(_Constraint):
     return True
 
   def mask(self, df):
-    return f.reduce(op.and_,
-                    (constraint.mask(df[colname]) for colname, constraint in self.fields.items()),
-                    pd.Series([True] * df.shape[0], index=df.index))
+    empty_mask = pd.Series([False] * df.shape[0], index=df.index)
+    m = pd.Series([True] * df.shape[0], index=df.index)
+    for colname, constraint in self.fields.items():
+      try:
+        x = df[colname]
+      except:
+        return empty_mask
+      m_new = constraint.mask(x)
+      m &= m_new
+      df = df[m]
+    return m
 
 def ensure_constraint(x: Any) -> _Constraint:
   if isinstance(x, _Constraint):
