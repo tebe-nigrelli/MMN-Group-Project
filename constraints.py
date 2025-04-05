@@ -1,9 +1,121 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 import functools as f
 import operator as op
-from typing import Any, Generic, Iterable, Sequence, TypeAlias, TypeVar, overload
-import typing
+from typing import Any, Callable, Iterable, Mapping, TypeVar
 import pandas as pd
+
+"""
+
+This module defines the _Constraints class, which is a mechanism by
+which you can define constraints for values.
+
+The following constraints work for all fields:
+
+  NOT(constraint)
+    Match the current object if `constraint` does not match it.
+
+  OR(constraints...) or [constraints...]
+    Match the current object if any of `constraints` matches it.
+
+  AND(constraints...)
+    Match the current object if all of `constraints` matches it.
+
+The following constraint works for strings:
+
+  'name'
+    Match the current object if it is equal to the string `'name'`.
+
+The following constraints work for numeric fields:
+
+  number
+    Match the current object if it is equal to `number`.
+
+  RANGE(lb, ub, lb_strict=False, ub_strict=True)
+    Match the current object if it is a number in the range [lb, ub],
+    where the bounds are strict depending on `lb_strict` and
+    `ub_strict`.
+
+    `lb` and `ub` may be `None`, which signifies a lack of bound.
+
+The following works on dataframes:
+
+  FIELD(field=constraint...) or {'field': constraint ...}
+
+    Match each `field` column of the given dataframe against the
+    corresponding `constraint`.
+
+    Note: When doing `x in FIELD(...)`, `x` needs to be a row of the
+    dataframe, though if you're not calling that then just don't
+    bother.
+
+    Note: Technically speaking there is no need for the object to be a
+    dataframe.  We are actually just checking `x[field] in constraint`
+    for each pair of `field` and `constraint`.
+
+Examples:
+
+  If you wanted to get all units where the `isi_violations` are
+  less than 0.7, you would call
+  ```
+    units(isi_violations=RANGE(None,0.7))
+  ```
+  and if you wanted those with `isi_violations` between 0.2 and 0.4,
+  you would call
+  ```
+    units(isi_violations=RANGE(0.2,0.4))
+  ```
+  or equivalently,
+  ```
+    units(isi_violations=AND(RANGE(NONE,0.4), RANGE(0.2, 0.6)))
+  ```
+  even though that would be pointless.
+
+  If you want to return all the units where the region of the brain is
+  'VISrl',
+  ```
+    units(ecephys_structure_acronym='VISrl')
+  ```
+  and if you want to also include 'APN',
+  ```
+    units(ecephys_structure_acronym=['VISrl', 'APN'])
+  ```
+  or 
+  ```
+    units(ecephys_structure_acronym=OR('VISrl', 'APN'))
+  ```
+
+  The functions `units` and `stimulus_presentations` are actually
+  simple wrappers around `filter_df` with a `FIELD` constraint.
+
+  The call to
+  ```
+    stimulus_presentations(stimulus_name = 'gabors',
+                           stimulus_condition_id = 1,
+                           duration = RANGE(None, 0.24))
+  ```
+  is fully equivalent to
+  ```
+    filter_df(CURRENT_SESSION.stimulus_presentations,
+              FIELD(stimulus_name = 'gabors',
+                    stimulus_condition_id = 1,
+                    duration = RANGE(None, 0.24)))
+  ```
+  and also to
+  ```
+    filter_df(CURRENT_SESSION.stimulus_presentations,
+              {'stimulus_name': 'gabors',
+               'stimulus_condition_id': 1,
+               'duration': RANGE(None, 0.24)})
+  ```
+
+  FIELD constraints can be combined together with OR, AND, and NOT as
+  well:
+
+
+
+"""
 
 class _Constraint():
   """Base class for constraints.
@@ -28,22 +140,20 @@ class _ContainerConstraint(_Constraint):
   constraints.
 
   """
-  @overload
-  def __init__(self, cs: Iterable[_Constraint]): ...
-  @overload
-  def __init__(self, *cs: _Constraint): ...
-  def __init__(self, *cs): # pyright: ignore
-    if len(cs) == 0 or isinstance(cs[0], _Constraint):
-      self.cs = typing.cast(Iterable[_Constraint], cs)
-    else:
+  def __init__(self, *cs):
+    if (len(cs) != 0 and
+        isinstance(cs[0], Iterable) and
+        not isinstance(cs[0], str)):
       assert len(cs) == 1
-      assert isinstance(cs[0], Iterable)
-      self.cs = typing.cast(Iterable[_Constraint], cs[0])
+      self.cs = cs[0]
+    else:
+      self.cs = cs
+    self.cs: Iterable[_Constraint] = map(ensure_constraint, self.cs)
   
-class _NotConstraint(_Constraint):
+class NOT(_Constraint):
   """Match object if constraint `c` does not match."""
   def __init__(self, c: _Constraint):
-    self.c = c
+    self.c = ensure_constraint(c)
 
   def __contains__(self, obj):
     return obj in self.c
@@ -51,7 +161,7 @@ class _NotConstraint(_Constraint):
   def mask(self, df):
     return ~self.c.mask(df)
     
-class _OrConstraint(_ContainerConstraint):
+class OR(_ContainerConstraint):
   """Match object if any constraint `cs` matches."""
   def __init__(self, *cs):
     super().__init__(*cs)
@@ -62,7 +172,7 @@ class _OrConstraint(_ContainerConstraint):
   def mask(self, df):
     return f.reduce(op.or_, (c.mask(df) for c in self.cs), pd.Series([False]*df.shape[0], index=df.index))
   
-class _AndConstraint(_ContainerConstraint):
+class AND(_ContainerConstraint):
   """Match object if all constraints `cs` matches."""
   def __init__(self, *cs):
     super().__init__(*cs)
@@ -72,8 +182,8 @@ class _AndConstraint(_ContainerConstraint):
 
   def mask(self, df):
     return f.reduce(op.and_, (c.mask(df) for c in self.cs), pd.Series([True]*df.shape[0], index=df.index))
-  
-class _EqConstraint(_Constraint):
+
+class EQ(_Constraint):
   """Match object if equal to `obj`."""
   def __init__(self, obj: Any):
     self.obj = obj
@@ -84,7 +194,7 @@ class _EqConstraint(_Constraint):
   def mask(self, df):
     return df == self.obj
   
-class _RangeConstraint(_Constraint):
+class RANGE(_Constraint):
   """Match object if between `lb` and `ub`.
 
   `lb` and `ub` are the lower and upper bounds respectively.  If
@@ -116,79 +226,41 @@ class _RangeConstraint(_Constraint):
       m &= (self.ub > df) if self.ub_strict else (self.ub >= df)
     return m
 
-# The classes NOT, OR, AND, and RANGE are there so we can
-# unambiguously type our constraints, while maintaining
-# context-dependence.
+_K = TypeVar('_K')
+_V1 = TypeVar('_V1')
+_V2 = TypeVar('_V2')
+def _map_dict(func: Callable[[_V1],_V2], m: dict[_K, _V1]) -> dict[_K, _V2]:
+  return {k:func(v) for k,v in m.items()}
   
-_T = TypeVar('_T')
-class NOT(Generic[_T]):
-  __match_args__ = ("thing",)
-  def __init__(self, thing: _T):
-    self.thing = thing
+class FIELD(_Constraint):
+  """Match object if each of its field matches the corresponding constraint."""
 
-class OR(Generic[_T]):
-  __match_args__ = ("things",)
-  def __init__(self, *things: _T):
-    self.things = things
+  def __init__(self, **kwargs: Mapping[str,_Constraint|Any]):
+    self.fields = _map_dict(ensure_constraint, kwargs)
 
-class AND(Generic[_T]):
-  __match_args__ = ("things",)
-  def __init__(self, *things: _T):
-    self.things = things
+  def __contains__(self, obj):
+    for field, constraint in self.fields.items():
+      try:
+        x = obj[field]
+      except:
+        return False
+      if x not in constraint:
+        return False
+    return True
 
-class RANGE:
-  __match_args__ = ("lb", "ub", "lb_strict", "ub_strict")
-  def __init__(self, lb: None|int|float, ub: None|int|float,
-               lb_strict: bool = False,
-               ub_strict: bool = True):
-    self.lb = lb
-    self.ub = ub
-    self.lb_strict = lb_strict
-    self.ub_strict = ub_strict
+  def mask(self, df):
+    return f.reduce(op.and_,
+                    (constraint.mask(df[colname]) for colname, constraint in self.fields.items()),
+                    pd.Series([True] * df.shape[0], index=df.index))
 
-NumConstraint: TypeAlias = int | float   \
-  | tuple[None|int|float,None|int|float] \
-  | RANGE                                \
-  | Sequence['NumConstraint']            \
-  | NOT['NumConstraint']                 \
-  | OR['NumConstraint']                  \
-  | AND['NumConstraint']
+def ensure_constraint(x: Any) -> _Constraint:
+  if isinstance(x, _Constraint):
+    return x
+  if isinstance(x, Mapping):
+    return FIELD(**x)
+  if isinstance(x, Iterable) and not isinstance(x, str):
+    return OR(x)
+  return EQ(x)
 
-def parse_NumConstraint(c: NumConstraint) -> _Constraint:
-  match c:
-    case int() | float():
-      return _EqConstraint(c)
-    case ((None | int() | float()) as lb,
-          (None | int() | float()) as ub):
-      return _RangeConstraint(lb, ub)
-    case RANGE(lb, ub, lb_strict, ub_strict):
-      return _RangeConstraint(lb, ub, lb_strict, ub_strict)
-    case NOT(c):
-      return _NotConstraint(parse_NumConstraint(c))
-    case AND(cs):
-      return _AndConstraint(map(parse_NumConstraint, cs))
-    case OR(cs) | [*cs]:
-      return _OrConstraint(map(parse_NumConstraint, cs))
-    case _:
-      typing.assert_never
-      raise Exception(f"Invalid numerical constraint {c}")
-
-StrConstraint: TypeAlias = str \
-  | Sequence['StrConstraint']  \
-  | NOT['StrConstraint']       \
-  | OR['StrConstraint']        \
-  | AND['StrConstraint']
-  
-def parse_StrConstraint(c: StrConstraint) -> _Constraint:
-  match c:
-    case str():
-      return _EqConstraint(c)
-    case NOT(c):
-      return _NotConstraint(parse_StrConstraint(c))
-    case AND(cs):
-      return _AndConstraint(map(parse_StrConstraint, cs))
-    case OR(cs) | [*cs]:
-      return _OrConstraint(map(parse_StrConstraint, cs))
-    case _:
-      typing.assert_never
-      raise Exception(f"Invalid string constraint {c}")
+def filter_df(df, constraint):
+  return df[ensure_constraint(constraint).mask(df)]
