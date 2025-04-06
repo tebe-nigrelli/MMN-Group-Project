@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from constraints import (FIELD, NOT, OR, AND, EQ, RANGE, filter_df)
+from constraints import *
 
 RUN_EXAMPLES: Final[bool] = False
 
@@ -34,6 +34,13 @@ assert CURRENT_SESSION_ID in SESSION_IDS
 
 CURRENT_SESSION: Session = CACHE.get_session_data(CURRENT_SESSION_ID)
 """The primary session object to work on."""
+
+def sessions(**kwargs):
+  """Filter `SESSIONS_TABLE`."""
+  return filter_df(SESSIONS_TABLE, FIELD(**kwargs))
+
+def session_ids(**kwargs):
+  return sessions(**kwargs).index
   
 def units(ecephys_structure_acronym = None,
           session: Session = CURRENT_SESSION,
@@ -63,6 +70,25 @@ def stimulus_presentations(stimulus_name = None,
 
 def stimulus_presentation_ids(**kwargs):
   return stimulus_presentations(**kwargs).index
+
+def presentationwise_spike_times(session: Session = CURRENT_SESSION, **kwargs):
+  if '__total__' in kwargs:
+    del kwargs['__total__']
+  return session.presentationwise_spike_times(
+    stimulus_presentation_ids = stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
+    unit_ids = unit_ids(session = session, __total__ = False, **kwargs)
+  )
+
+def conditionwise_spike_statistics(use_rates: Optional[bool] = False,
+                                   session: Session = CURRENT_SESSION,
+                                   **kwargs):
+  if '__total__' in kwargs:
+    del kwargs['__total__']
+  return session.conditionwise_spike_statistics(
+    stimulus_presentation_ids = stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
+    unit_ids = unit_ids(session = session, __total__ = False, **kwargs),
+    use_rates = use_rates
+  )
 
 def dataset(session: Session = CURRENT_SESSION):
   ...

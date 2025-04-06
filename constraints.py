@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-import functools as f
-import operator as op
-from typing import Any, Callable, Iterable, Mapping, TypeVar
+from typing import Any, Callable, Collection, Iterable, Mapping, TypeVar
 import pandas as pd
 
 """
@@ -148,9 +146,8 @@ class Constraint():
   def __contains__(self, obj) -> bool:
     pass
 
-  @abstractmethod
   def mask(self, df: pd.DataFrame|pd.Series) -> pd.Series:
-    pass
+    return df.apply(self.__contains__)
 
 class _ContainerConstraint(Constraint):
   """Convenience class to define `_AndConstraint` and `_OrConstraint`,
@@ -221,7 +218,34 @@ class EQ(Constraint):
 
   def mask(self, df):
     return df == self.obj
+
+class SATISFIES(Constraint):
+  """Match object if calling `func` on it returns True."""
+  def __init__(self, func: Callable):
+    self.func = func
+
+  def __contains__(self, obj):
+    return bool(self.func(obj))
+
+class MEMBER(Constraint):
+  """Match object if it is in `members`."""
+  def __init__(self, members: Collection):
+    self.members = members
+
+  def __contains__(self, obj):
+    return obj in self.members
+
+  def mask(self, df):
+    return OR(map(EQ, self.members)).mask(df)
   
+class CONTAINS(Constraint):
+  """Match object if it contains an element matching the constraint."""
+  def __init__(self, c):
+    self.c = ensure_constraint(c)
+
+  def __contains__(self, obj):
+    return any(e in self.c for e in obj)
+
 class RANGE(Constraint):
   """Match object if between `lb` and `ub`.
 
@@ -264,6 +288,7 @@ class FIELD(Constraint):
   """Match object if each of its field matches the corresponding constraint."""
 
   def __init__(self, **kwargs: Mapping[str,Constraint|Any]):
+    self.total = kwargs.get('__total__', True)
     self.fields = _map_dict(ensure_constraint, kwargs)
 
   def __contains__(self, obj):
@@ -271,9 +296,11 @@ class FIELD(Constraint):
       try:
         x = obj[field]
       except:
-        return False
-      if x not in constraint:
-        return False
+        if self.total:
+          return False
+      else:
+        if x not in constraint:
+          return False
     return True
 
   def mask(self, df):
@@ -283,10 +310,12 @@ class FIELD(Constraint):
       try:
         x = df[colname]
       except:
-        return empty_mask
-      m_new = constraint.mask(x)
-      m &= m_new
-      df = df[m]
+        if self.total:
+          return empty_mask
+      else:
+        m_new = constraint.mask(x)
+        m &= m_new
+        df = df[m]
     return m
 
 def ensure_constraint(x: Any) -> Constraint:
@@ -294,6 +323,8 @@ def ensure_constraint(x: Any) -> Constraint:
     return x
   if isinstance(x, Mapping):
     return FIELD(**x)
+  if isinstance(x, set):
+    return MEMBER(x)
   if isinstance(x, Iterable) and not isinstance(x, str):
     return OR(x)
   return EQ(x)
