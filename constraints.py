@@ -315,7 +315,7 @@ class FIELD(Constraint):
       else:
         m_new = constraint.mask(x)
         m &= m_new
-        df = df[m]
+        df = df[m_new]
     return m
 
 def ensure_constraint(x: Any) -> Constraint:
