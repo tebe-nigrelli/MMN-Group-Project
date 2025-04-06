@@ -39,7 +39,10 @@ assert CURRENT_SESSION_ID in SESSION_IDS
 
 CURRENT_SESSION: Final[Session] = CACHE.get_session_data(CURRENT_SESSION_ID)
 """The primary session object to work on."""
-CURRENT_SESSION.metadata
+with warnings.catch_warnings():
+  if DEBUG: print("Loading metadata...")
+  CURRENT_SESSION.metadata
+  if DEBUG: print("Loading metadata... Done")
 
 def get_sessions(**kwargs):
   """Return a table of the matching sessions.
