@@ -35,14 +35,14 @@ assert CURRENT_SESSION_ID in SESSION_IDS
 CURRENT_SESSION: Session = CACHE.get_session_data(CURRENT_SESSION_ID)
 """The primary session object to work on."""
 
-def sessions(**kwargs):
+def get_sessions(**kwargs):
   """Filter `SESSIONS_TABLE`."""
   return filter_df(SESSIONS_TABLE, FIELD(**kwargs))
 
-def session_ids(**kwargs):
-  return sessions(**kwargs).index
+def get_session_ids(**kwargs):
+  return get_sessions(**kwargs).index
   
-def units(ecephys_structure_acronym = None,
+def get_units(ecephys_structure_acronym = None,
           session: Session = CURRENT_SESSION,
           **kwargs):
   """Return the `Session.units` dataframe of `session`.
@@ -52,10 +52,10 @@ def units(ecephys_structure_acronym = None,
     kwargs['ecephys_structure_acronym'] = ecephys_structure_acronym
   return filter_df(session.units, FIELD(**kwargs))
 
-def unit_ids(**kwargs):
-  return units(**kwargs).index
+def get_unit_ids(**kwargs):
+  return get_units(**kwargs).index
 
-def stimulus_presentations(stimulus_name = None,
+def get_stimulus_presentations(stimulus_name = None,
                            stimulus_condition_id = None,
                            session: Session = CURRENT_SESSION,
                            **kwargs):
@@ -68,25 +68,25 @@ def stimulus_presentations(stimulus_name = None,
     kwargs['stimulus_condition_id'] = stimulus_condition_id
   return filter_df(session.stimulus_presentations, FIELD(**kwargs))
 
-def stimulus_presentation_ids(**kwargs):
-  return stimulus_presentations(**kwargs).index
+def get_stimulus_presentation_ids(**kwargs):
+  return get_stimulus_presentations(**kwargs).index
 
-def presentationwise_spike_times(session: Session = CURRENT_SESSION, **kwargs):
+def get_presentationwise_spike_times(session: Session = CURRENT_SESSION, **kwargs):
   if '__total__' in kwargs:
     del kwargs['__total__']
   return session.presentationwise_spike_times(
-    stimulus_presentation_ids = stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
-    unit_ids = unit_ids(session = session, __total__ = False, **kwargs)
+    stimulus_presentation_ids = get_stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
+    unit_ids = get_unit_ids(session = session, __total__ = False, **kwargs)
   )
 
-def conditionwise_spike_statistics(use_rates: Optional[bool] = False,
+def get_conditionwise_spike_statistics(use_rates: Optional[bool] = False,
                                    session: Session = CURRENT_SESSION,
                                    **kwargs):
   if '__total__' in kwargs:
     del kwargs['__total__']
   return session.conditionwise_spike_statistics(
-    stimulus_presentation_ids = stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
-    unit_ids = unit_ids(session = session, __total__ = False, **kwargs),
+    stimulus_presentation_ids = get_stimulus_presentation_ids(session = session, __total__ = False, **kwargs),
+    unit_ids = get_unit_ids(session = session, __total__ = False, **kwargs),
     use_rates = use_rates
   )
 

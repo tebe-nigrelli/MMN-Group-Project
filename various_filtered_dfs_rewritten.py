@@ -4,7 +4,7 @@
 
 ## |‾‾‾‾‾‾‾‾‾‾ Filter sessions ‾‾‾‾‾‾‾‾‾‾‾‾‾|
 from constraints import filter_df
-from dataset import stimulus_presentation_ids
+from dataset import get_stimulus_presentation_ids
 
 brain_obs_sessions = sessions[(sessions.session_type == "brain_observatory_1.1")]
 uh_brain_obs_sessions = brain_obs_sessions[(brain_obs_sessions["unit_count"] >= 650)]
@@ -13,17 +13,17 @@ regions_uh_brain_obs_sessions = uh_brain_obs_sessions[
     uh_brain_obs_sessions["ecephys_structure_acronyms"].apply(
         lambda x: all(region in str(x) for region in required_regions))]
 ## |------------ Equivalent to -------------|
-sessions(session_type='brain_observatory_1.1',
-         unit_count=RANGE(650, None), 
-         ecephys_structure_acronyms=AND(map(CONTAINS,{"VISp", "VISl", "VISal", "VISpm", "VISam"})))
+get_sessions(session_type='brain_observatory_1.1',
+             unit_count=RANGE(650, None), 
+             ecephys_structure_acronyms=AND(map(CONTAINS,{"VISp", "VISl", "VISal", "VISpm", "VISam"})))
 ## |---------------- or --------------------|
-sessions(session_type='brain_observatory_1.1',
-         unit_count=RANGE(650, None), 
-         ecephys_structure_acronyms=AND(CONTAINS("VISp"),
-                                        CONTAINS("VISl"),
-                                        CONTAINS("VISal"),
-                                        CONTAINS("VISpm"),
-                                        CONTAINS("VISam")))
+get_sessions(session_type='brain_observatory_1.1',
+             unit_count=RANGE(650, None), 
+             ecephys_structure_acronyms=AND(CONTAINS("VISp"),
+                                            CONTAINS("VISl"),
+                                            CONTAINS("VISal"),
+                                            CONTAINS("VISpm"),
+                                            CONTAINS("VISam")))
 ## |________________________________________|
 
 
@@ -50,14 +50,14 @@ spike_times_static = session2.presentationwise_spike_times(
 )
 ## |--------------- Equivalent to -----------------|
 session2.presentationwise_spike_times(
-  stimulus_presentation_ids = stimulus_presentation_ids(stimulus_name = 'static_gratings',
-                                                        orientation = 0.0),
-  unit_ids = unit_ids(ecephys_structure_acronym = 'VISam'))
+  stimulus_presentation_ids = get_stimulus_presentation_ids(stimulus_name = 'static_gratings',
+                                                            orientation = 0.0),
+  unit_ids = get_unit_ids(ecephys_structure_acronym = 'VISam'))
 ## |------------------- or ------------------------|
-presentationwise_spike_times(stimulus_name = 'static_gratings',
-                             orientation = 0.0,
-                             ecephys_structure_acronym = 'VISam',
-                             session = session2)
+get_presentationwise_spike_times(stimulus_name = 'static_gratings',
+                                 orientation = 0.0,
+                                 ecephys_structure_acronym = 'VISam',
+                                 session = session2)
 ## |_______________________________________________|
 
 
@@ -74,11 +74,11 @@ spikes_first = spike_times_static[mask]
 filter_df(spike_times_static,
           FIELD(stimulus_presentation_id = RANGE(id0, idf, ub_strict=True)))
 ## |------------------- or ------------------------|
-presentationwise_spike_times(stimulus_name = 'static_gratings',
-                             orientation = 0.0,
-                             ecephys_structure_acronym = 'VISam',
-                             stimulus_presentation_id = RANGE(id0, idf, ub_strict=True)
-                             session = session2)
+get_presentationwise_spike_times(stimulus_name = 'static_gratings',
+                                 orientation = 0.0,
+                                 ecephys_structure_acronym = 'VISam',
+                                 stimulus_presentation_id = RANGE(id0, idf, ub_strict=True)
+                                 session = session2)
 ## |_______________________________________________|
 
 
@@ -115,11 +115,11 @@ def get_spike(session, stimuli, ecephys_structure_acronym):
 static_spike_counts = get_spike(session, stimuli = "static_gratings", ecephys_structure_acronym="VISam")
 drifting_spike_counts = get_spike(session, stimuli = "drifting_gratings", ecephys_structure_acronym="VISam")
 ## |--------------- Equivalent to -----------------|
-static_spike_counts = conditionwise_spike_statistics(
+static_spike_counts = get_conditionwise_spike_statistics(
   ecephys_structure_acronym = 'VISam',
   stimulus_name = 'static_gratings',
   session = session)
-drifting_spike_counts = conditionwise_spike_statistics(
+drifting_spike_counts = get_conditionwise_spike_statistics(
   ecephys_structure_acronym = 'VISam',
   stimulus_name = 'drifting_gratings',
   session = session)
