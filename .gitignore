@@ -9,3 +9,7 @@
 !*.txt
 
 !proj.org
+initial_EDA.ipynb
+download_test.ipynb
+
+example_allensdk.ipynb
