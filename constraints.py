@@ -227,7 +227,7 @@ class SATISFIES(Constraint):
   def __contains__(self, obj):
     return bool(self.func(obj))
 
-class MEMBER(Constraint):
+class ISIN(Constraint):
   """Match object if it is in `members`."""
   def __init__(self, members: Collection):
     self.members = members
@@ -237,7 +237,16 @@ class MEMBER(Constraint):
 
   def mask(self, df):
     return OR(map(EQ, self.members)).mask(df)
-  
+
+class MEMBER(ISIN):
+  """Match object if it is in `members`.
+
+  This is a deprecated alias to `ISIN`."""
+  def __init_subclass__(cls):
+    import warnings
+    warnings.warn("`MEMBER`, is a deprecated alias to `ISIN`.", DeprecationWarning, 2)
+    return super().__init_subclass__()
+
 class CONTAINS(Constraint):
   """Match object if it contains an element matching the constraint."""
   def __init__(self, c):
