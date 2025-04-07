@@ -12,10 +12,10 @@ df_file = data_dir + "/" + "df.csv"
 manifest_path = os.path.join(data_dir, "manifest.json")
 cache = EcephysProjectCache.from_warehouse(manifest=manifest_path)
 
-def get_dataset(session_number:int, stimulus: str, cortex:str):
+def get_dataset(session_number:int, stimulus: str, regions:list):
     session = cache.get_session_data(session_number)
     table = session.get_stimulus_table(stimulus)
-    partial_ids = session.units[session.units["ecephys_structure_acronym"] == cortex]
+    partial_ids = session.units[session.units["ecephys_structure_acronym"].isin(regions)]
 
     spike_times_drifting = session.presentationwise_spike_times(
         stimulus_presentation_ids=table.index.values,
