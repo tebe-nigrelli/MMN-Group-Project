@@ -137,17 +137,13 @@ def get_units(ecephys_structure_acronym = None,
 
   return filter_df(units, FIELD(**kwargs))
 
-def get_unit_ids(ecephys_structure_acronym = None,
-                 unit_ids = None,
-                 session: Session = CURRENT_SESSION,
-                 **kwargs):
+def get_unit_ids(*args, **kwargs):
   """Return the matching unit ids in `session`.
 
   See `get_units` for the list of meaningful filters.
 
   """
-  return get_units(ecephys_structure_acronym = ecephys_structure_acronym,
-                   unit_ids = unit_ids, session = session, **kwargs).index
+  return get_units(*args, **kwargs).index
 
 def get_stimulus_presentations(stimulus_name = None,
                                stimulus_presentation_ids = None,
@@ -191,21 +187,13 @@ def get_stimulus_presentations(stimulus_name = None,
     stimulus_presentations = stimulus_presentations.loc[stimulus_presentation_ids]
   return filter_df(stimulus_presentations, FIELD(**kwargs))
 
-def get_stimulus_presentation_ids(stimulus_name = None,
-                                  stimulus_presentation_ids = None,
-                                  stimulus_condition_id = None,
-                                  session: Session = CURRENT_SESSION,
-                                  **kwargs):
+def get_stimulus_presentation_ids(*args, **kwargs):
   """Return the matching stimulus presentation ids in `session`.
 
   See `get_stimulus_presentations` for a list of meaningful filters.
 
   """
-  return get_stimulus_presentations(stimulus_name = stimulus_name,
-                                    stimulus_presentation_ids = stimulus_presentation_ids,
-                                    stimulus_condition_id = stimulus_condition_id,
-                                    session = session,
-                                    **kwargs).index
+  return get_stimulus_presentations(*args, **kwargs).index
 
 def get_presentationwise_spike_times(session: Session = CURRENT_SESSION, **kwargs):
   """Return a table of the spike times of the matching units and stimuli.
