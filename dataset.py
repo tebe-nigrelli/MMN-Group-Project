@@ -226,7 +226,7 @@ def get_conditionwise_spike_statistics(use_rates: Optional[bool] = False,
     use_rates = use_rates
   )
 
-def get_spike_times_with_units(session: Session = CURRENT_SESSION, **kwargs):
+def get_annotated_spike_times(session: Session = CURRENT_SESSION, **kwargs):
   """Return a table of spike times alongside the unit and stimulus information.
 
   All filters which `get_units` and `get_stimulus_presentations`
