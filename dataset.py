@@ -226,7 +226,10 @@ def get_conditionwise_spike_statistics(use_rates: Optional[bool] = False,
     use_rates = use_rates
   )
 
-def get_annotated_spike_times(session: Session = CURRENT_SESSION, **kwargs):
+def get_annotated_spike_times(unit_columns: None|set[str] = {'structure_acronym'},
+                              bin_size: Optional[float] = None,
+                              bin_col_name: str = 'bin_no',
+                              session: Session = CURRENT_SESSION, **kwargs):
   """Return a table of spike times alongside the unit and stimulus information.
 
   All filters which `get_units` and `get_stimulus_presentations`
@@ -235,9 +238,16 @@ def get_annotated_spike_times(session: Session = CURRENT_SESSION, **kwargs):
   """
   kwargs['session'] = session
   kwargs['__total__'] = False
-  return get_presentationwise_spike_times(**kwargs) \
-    .merge(get_stimulus_presentations(**kwargs), left_on='stimulus_presentation_id', right_index=True) \
-    .merge(get_units(**kwargs), left_on='unit_id', right_index=True)
+
+  df = get_presentationwise_spike_times(**kwargs)
+  df = df.merge(get_stimulus_presentations(**kwargs), left_on='stimulus_presentation_id', right_index=True)
+  if unit_columns is None:
+    df = df.merge(get_units(**kwargs), left_on='unit_id', right_index=True)
+  else:
+    df = df.merge(get_units(**kwargs)[list(unit_columns)], left_on='unit_id', right_index=True)
+  if bin_size is not None:
+    df[bin_col_name] = df['time_since_stimulus_presentation_onset'].apply(lambda x: int(x // bin_size))
+  return df
 
 def dataset(session: Session = CURRENT_SESSION):
   ...
