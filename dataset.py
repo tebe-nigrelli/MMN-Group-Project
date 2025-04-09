@@ -10,7 +10,7 @@ def example(x):
   if EXAMPLE:
     return x
 
-DATA_DIR: Final[pathlib.Path] = pathlib.Path('./data/')
+DATA_DIR: Final[pathlib.Path] = pathlib.Path('./allendata/')
 """Path to the data directory, relative to project root."""
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -33,7 +33,7 @@ SESSIONS_TABLE = CACHE.get_session_table()
 SESSION_IDS: Final[Sequence[int]] = SESSIONS_TABLE.index
 """List of available session ids."""
 
-CURRENT_SESSION_ID: Final[int] = 715093703
+CURRENT_SESSION_ID: Final[int] = 750332458
 """ID of the primary session to work on."""
 assert CURRENT_SESSION_ID in SESSION_IDS
 
