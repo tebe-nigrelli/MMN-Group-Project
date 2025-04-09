@@ -249,5 +249,19 @@ def get_annotated_spike_times(unit_columns: None|set[str] = {'structure_acronym'
     df[bin_col_name] = df['time_since_stimulus_presentation_onset'].apply(lambda x: int(x // bin_size))
   return df
 
+def get_grouped_spike_rates(groups: Iterable[str] = ['structure_acronym', 'stimulus_name'],
+                            bin_size: float = 0.1,
+                            bin_col_name: str = 'bin_no',
+                            spike_rate_col_name: str = 'spike_rate',
+                            session: Session = CURRENT_SESSION,
+                            **kwargs):
+  return pd.DataFrame(
+    get_annotated_spike_times(bin_size=bin_size, bin_col_name=bin_col_name, session=session, **kwargs)
+    .groupby(list(groups))[bin_col_name]
+    .value_counts()
+    .rename(spike_rate_col_name)
+    .div(bin_size)
+  ).reset_index(bin_col_name)
+
 def dataset(session: Session = CURRENT_SESSION):
   ...
