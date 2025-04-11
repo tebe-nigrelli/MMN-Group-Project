@@ -4,7 +4,7 @@ How is orientation perceived in the neural response of mice?
 
 # Abstract
 
-
+Understanding the dynamics of neuron excitation in the brain is a difficult task due to the intrinsic complexity of inter-neuron connectivity. This investigation uses neuron firing rate statistics to differentiate cross-region and cross-stimuli behavior and shed light on the distinction between different static grating orientations. We uncover the relation between neurons in different cortical regions and propose a simple model to understand 'superstar' neurons and regions.
 
 # Introduction
 The introduction should provide background information on the topic, including relevant literature and the objectives of the study. 
@@ -12,7 +12,7 @@ The introduction should provide background information on the topic, including r
 ## Data Visualization
 
 **Raster Plots**
-- how individual neurons reponse across different orientations of static gratings
+- how individual neurons response across different orientations of static gratings
 - compare timing / pattern of spikes to identify any distinct temporal patterns among neurons
 
 ## Single-Neuron Analysis
