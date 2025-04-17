@@ -4,10 +4,10 @@ How is orientation perceived in the neural response of mice?
 
 # Abstract
 
-
+In this study, we analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to drifting gratings stimuli. Our aim is to identify brain regions and specific neurons that have a significant role in encoding stimulus orientation. Focusing on the __ REGIONS, we evaluate neural firing rate across multiple trials and conditions. By selecting the most informative neurons based on their response, we construct a decoder capable of predicting stimulus orientation from neural activty. COMMENT ON PERFORMANCE
 
 # Introduction
-The introduction should provide background information on the topic, including relevant literature and the objectives of the study. 
+Understanding how the brain encodes visual information is a central goal in neuroscience. In particular, the perception of orientation in the visual cortex has been extensively studied as a model for sensory coding. Orientation selectivity—the tendency of neurons to respond preferentially to visual stimuli of a particular orientation—is a fundamental feature of early visual processing.
 
 ## Data Visualization
 
