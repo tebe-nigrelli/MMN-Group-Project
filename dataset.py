@@ -263,12 +263,14 @@ def get_grouped_spike_rates(groups: Iterable[str] = ['structure_acronym', 'stimu
     .div(bin_size)
   ).reset_index(bin_col_name)
 
-def get_spike_info(session: Session = CURRENT_SESSION, **kwargs):
+def get_spike_info(use_rates: Optional[bool] = False,
+                   session: Session = CURRENT_SESSION,
+                   **kwargs):
   kwargs['session'] = session
   kwargs['__total__'] = False
-  return get_conditionwise_spike_statistics(**kwargs).reset_index() \
+  return get_conditionwise_spike_statistics(use_rates=use_rates, **kwargs).reset_index() \
     .merge(get_units(**kwargs)['structure_acronym'], left_on='unit_id', right_index=True) \
-    .merge(get_stimulus_presentations(**kwargs), on='stimulus_condition_id') \
+    .merge(get_stimulus_presentations(**kwargs).reset_index(), on='stimulus_condition_id') \
     .set_index('unit_id')
 
 def dataset(session: Session = CURRENT_SESSION):
