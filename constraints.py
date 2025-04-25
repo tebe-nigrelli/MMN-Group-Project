@@ -342,6 +342,8 @@ class FIELD(Constraint):
     return m
 
 def ensure_constraint(x: Any) -> Constraint:
+  if x is None:
+    return TRUE
   if isinstance(x, Constraint):
     return x
   if isinstance(x, Mapping):
