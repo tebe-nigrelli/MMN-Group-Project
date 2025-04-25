@@ -306,13 +306,15 @@ _V1 = TypeVar('_V1')
 _V2 = TypeVar('_V2')
 def _map_dict(func: Callable[[_V1],_V2], m: dict[_K, _V1]) -> dict[_K, _V2]:
   return {k:func(v) for k,v in m.items()}
-  
+
+FieldDict: TypeAlias = dict[str, Constraint|Any]
+
 class FIELD(Constraint):
   """Match object if each of its field matches the corresponding constraint."""
 
-  def __init__(self, **kwargs: Mapping[str,Constraint|Any]):
+  def __init__(self, **kwargs: Constraint|Any):
     self.total = kwargs.get('__total__', True)
-    self.fields = _map_dict(ensure_constraint, kwargs)
+    self.fields: FieldDict = _map_dict(ensure_constraint, kwargs)
 
   def __contains__(self, obj):
     for field, constraint in self.fields.items():
