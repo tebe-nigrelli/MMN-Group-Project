@@ -362,3 +362,24 @@ def filter_df(df, constraint: Optional[Constraint|Any] = None, / , **field_const
   if field_constraints:
     df = df[FIELD(**field_constraints).mask(df)]
   return df
+
+@overload
+def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FIELD) -> FIELD:
+  ...
+@overload
+def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FieldDict) -> FieldDict:
+  ...
+def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FieldDict|FIELD) -> FieldDict|FIELD:
+  if isinstance(field_constraint, dict):
+    constraint_dict = field_constraint
+  elif isinstance(field_constraint, FIELD):
+    constraint_dict = field_constraint.fields
+  else:
+    raise Exception("Invalid `field_constraint`")
+
+  if field in constraint_dict:
+    constraint_dict[field] = AND(constraint_dict[field], constraint)
+  else:
+    constraint_dict[field] = constraint
+
+  return field_constraint
