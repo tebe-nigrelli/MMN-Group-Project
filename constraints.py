@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Collection, Iterable, Mapping, TypeVar
+from typing import Any, Callable, Collection, Final, Iterable, Mapping, Optional, TypeAlias, TypeVar, overload
 import pandas as pd
 
 """
@@ -356,5 +356,9 @@ def ensure_constraint(x: Any) -> Constraint:
     return OR(x)
   return EQ(x)
 
-def filter_df(df, constraint):
-  return df[ensure_constraint(constraint).mask(df)]
+def filter_df(df, constraint: Optional[Constraint|Any] = None, / , **field_constraints: Constraint|Any):
+  if constraint is not None:
+    df = df[ensure_constraint(constraint).mask(df)]
+  if field_constraints:
+    df = df[FIELD(**field_constraints).mask(df)]
+  return df
