@@ -149,6 +149,20 @@ class Constraint():
   def mask(self, df: pd.DataFrame|pd.Series) -> pd.Series:
     return df.apply(self.__contains__)
 
+class _TRUE(Constraint):
+  """Always true constraint."""
+  def __init__(self): return
+  def __contains__(self, obj): return True
+  def mask(self, df): return pd.Series(True, index=df.index)
+
+class _FALSE(Constraint):
+  def __init__(self): return
+  def __contains__(self, obj): return False
+  def mask(self, df): return pd.Series(False, index=df.index)
+
+TRUE: Final[_TRUE] = _TRUE()
+FALSE: Final[_FALSE] = _FALSE()
+
 class _ContainerConstraint(Constraint):
   """Convenience class to define `_AndConstraint` and `_OrConstraint`,
   which both take either an iterable of constraints or some amount of
