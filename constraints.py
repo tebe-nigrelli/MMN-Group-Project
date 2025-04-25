@@ -199,7 +199,7 @@ class OR(_ContainerConstraint):
     return any(obj in c for c in self.cs)
 
   def mask(self, df):
-    m = pd.Series([False] * df.shape[0], index=df.index)
+    m = pd.Series(False, index=df.index)
     for c in self.cs:
       m_new = c.mask(df)
       m |= m_new
@@ -215,7 +215,7 @@ class AND(_ContainerConstraint):
     return all(obj in c for c in self.cs)
 
   def mask(self, df):
-    m = pd.Series([True]*df.shape[0], index=df.index)
+    m = pd.Series(True, index=df.index)
     for c in self.cs:
       m_new = c.mask(df)
       m &= m_new
@@ -294,7 +294,7 @@ class RANGE(Constraint):
       and ((self.ub is None) or ((self.ub > obj) if self.ub_strict else (self.ub >= obj)))
 
   def mask(self, df):
-    m = pd.Series([True]*df.shape[0], index=df.index)
+    m = pd.Series(True, index=df.index)
     if self.lb is not None:
       m &= (self.lb < df) if self.lb_strict else (self.lb <= df)
     if self.ub is not None:
@@ -327,8 +327,8 @@ class FIELD(Constraint):
     return True
 
   def mask(self, df):
-    empty_mask = pd.Series([False] * df.shape[0], index=df.index)
-    m = pd.Series([True] * df.shape[0], index=df.index)
+    empty_mask = pd.Series(False, index=df.index)
+    m = pd.Series(True, index=df.index)
     for colname, constraint in self.fields.items():
       try:
         x = df[colname]
