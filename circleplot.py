@@ -19,7 +19,7 @@ df_spike = get_spike_info(use_rates=True,
 df_groupby = df_spike.reset_index().groupby('structure_acronym')
 n = len(df_groupby)
 sup_fig = plt.figure()
-sup_fig.suptitle('Static Grating Unit Orientation Spike Rates')
+sup_fig.suptitle('Drifting Grating Unit Orientation Spike Rates')
 figs = sup_fig.subfigures(int(sqrt(n)), int(sqrt(n)), squeeze=False)
 for fig, (region, df) in zip(figs.flatten(), df_groupby):
   n = len(df['unit_id'].unique())
