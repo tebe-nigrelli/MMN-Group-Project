@@ -1,6 +1,6 @@
 # Question
 
-How does stimulus orientation affect the mean firing rate of neurons in different regions?
+Investigating neuron responses to stimulus orientation in static and drifting gratings
 
 # Abstract
 
@@ -29,9 +29,9 @@ We started our investigation by searching the _AllenSDK_ dataset for a session c
 
 As is clearly apparent, although most of the units are labelled 'grey', a good portion of them belongs to the Visual cortex and some recordings are present from other regions. 
 
-# Dataset Characteristics
+# Data Processing
 
-The dataset consists of time-aligned responses of different units (neurons) to different different stimuli. Although both stimuli and responses are characterized by multiple features, for the purpose of our investigation we focus our observations by grouping the responses only by stimulus orientation, and focusing our statistical study on the mean firing rate of each unit, for fixed stimulus orientation.
+The dataset consists of time-aligned responses of units (neurons) to stimuli. Although both stimuli and responses are characterized by multiple features, for the purpose of our investigation we focus our observations by grouping the responses only by stimulus orientation, and focusing our statistical study on the mean firing rate of each unit, for fixed stimulus orientation.
 
 # Exploratory Data Analysis
 
@@ -58,54 +58,34 @@ For convenience, we also include both the single plots, showing each region sing
 
 ![](report_images/unit_firing_rate_statistics_single.png)
 
-## Single-Unit Analysis
-
-**Firing Rate Calculation**
-- for each neuron, average firing rate across all presented orientations
-- orientation "tuning curves"? to determine each neuron's preferred orientation
-
-**Selection Criteria**
-- identify neurons that exhibit strong, consistent responses
-- use statistical measures to pick neurons for reliable orientation encoding: OSI?
-
-## Population-Level Analysis
-
-**Grouping and Comparison**
-- aggregate responses from groups or regions of neurons to explore population-level encoding of orientation
-- compare activity patterns across brain regions 
-
-**Cross Neuron Correlations**
-- correlation of responses among neurons to detect collective dynamics or "network-level" integration of orientation info
-
-# 3 Selection of Neurons
-### 3.1 Orientation Selectivity Analysis
+# Selection of Neurons
+## Orientation Selectivity Analysis
 We quantified orientation selectivity of neurons in the  visual cortex using the Orientation Selectivity Index (OSI), defined as:
 $OSI = (R_{preferred} - R_{orthogonal})/(R_{preferred} + R_{orthogonal})$
 where R_preferred represents the mean firing rate at the preferred orientation and R_orthogonal represents the mean firing rate at the orthogonal orientation (90° offset from preferred). This analysis revealed a subset of neurons with pronounced orientation tuning (OSI > 0.5), which will provide good grounds for training a model.
 
-### 3.2 Statistical Validation of Orientation Tuning
-To statistically validate orientation tuining, we employed one-way ANOVA tests for each unit, comparing spike counts across different orientation presentations. The null hypothesis posited equal mean spike counts across all orientations, with the alternative hypothesis suggesting significant response differences to at least one orientation. This analysis identified a substantial population of neurons (p < 0.05) exhibiting statistically significant orientation tuning, confirming the presence of orientation-encoding properties within the dataset.
+## Statistical Validation of Orientation Tuning
+To statistically validate orientation tuning, we employed one-way ANOVA tests for each unit, comparing spike counts across different orientation presentations. The null hypothesis posited equal mean spike counts across all orientations, with the alternative hypothesis suggesting significant response differences to at least one orientation. This analysis identified a substantial population of neurons (p < 0.05) exhibiting statistically significant orientation tuning, confirming the presence of orientation-encoding properties within the dataset.
 
-### 3.3 Selection Criteria for Orientation-Selective Neurons
+## Selection Criteria for Orientation-Selective Neurons
 We established the following criteria for neuron selection:
 1. High orientation selectivity (OSI > 0.5)
 2. Statistically significant orientation tuning (ANOVA p < 0.05)
 
 This approach yielded a population of 43  orientation-selective neurons distributed in the visual cortex, with notable concentrations in the VISal and VISl areas. The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain. INCLUDE SOURCE!!!
 
-### 3.4 Tuning Properties of Selected Neurons
 Visualization of orientation tuning curves from representative neurons revealed diverse response profiles, including:
 - Narrowly tuned neurons with a strong response to one specific orientation
 - Neurons with a broader reaction to a few concurrent orientations
 
 These different tuning properties are likely beneficial to the encoding of orientation in the visual cortex, helping to discriminate between different orientations of visual stimuli.
 
-# 4 Decoding Orientation from Neural Activity
+# Decoding Orientation from Neural Activity
 
-### 4.1 Classification Approach
+## Classification Approach
 To assess whether the activity patterns of orientation-selective neurons could reliably predict stimulus orientation, we implemented a machine learning approach using the spike counts of selected neurons as features. The dataset consisted of spike count responses to static grating stimuli presented at six distinct orientations (0°, 30°, 60°, 90°, 120°, and 150°). The classification task involved predicting the stimulus orientation from the corresponding neural activity patterns.
 
-### 4.2 Data Preparation and Model Training
+## Data Preparation and Model Training
 We constructed a feature matrix where each row represented a stimulus presentation (indexed by stimulus_condition_id) and each column represented the spike count of an orientation-selective neuron. The target variable consisted of the corresponding orientation values. The dataset was stratified and split into training (70%) and testing (30%) sets to ensure proportional representation of all orientation classes.
 Prior to model training, features were standardized using z-score normalization to account for differences in baseline firing rates across neurons. We evaluated three classification algorithms:
 
@@ -113,17 +93,13 @@ Prior to model training, features were standardized using z-score normalization 
 - Support Vector Machine (SVM) with linear kernel
 - Multinomial Logistic Regression
 
-### 4.3 Classification Performance
+## Classification Performance
 
 
-### 4.4 Feature Importance Analysis
+## Feature Importance Analysis
 
 
-
-
-
-
-## Comparative Analysis: Static vs Drifting Gratings
+Performance on Drifting Gratings
 
 **Cross Condition Analysis**
 - compare neurons that show up in both static/drifting
@@ -131,8 +107,11 @@ Prior to model training, features were standardized using z-score normalization 
 **Temporal Dynamics**
 - Analyze the time aspects of responses in drifting, compare to static
 
+# Limitations
 
-## Final Product
+
+
+# Conclusion 
 
 *Orientation Decoder*
 
@@ -140,9 +119,4 @@ Robust decoder that can predict the orientation of a static grating based on the
 
 Benchmark and validate it, comparing its performance across different conditions to assess consistency and generality of neural code for orientation.
 
-# Methods
-Present the findings of the study, including statistical analyses, figures, and tables where applicable.
-
-Interpret the results, discuss their significance, compare them with previous research, and highlight potential limitations and future directions.
-
-Summarize the key findings and their implications in the field of neuroscience.
+# Citations

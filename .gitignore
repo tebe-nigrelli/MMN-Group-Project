@@ -1,5 +1,6 @@
 *
-!allendata/
+!report_images/
+!report_images/**
 !.gitignore
 
 !*.tex
@@ -7,6 +8,3 @@
 !*.ipynb
 !*.py
 !*.txt
-
-!proj.org
-
