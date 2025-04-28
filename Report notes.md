@@ -41,6 +41,13 @@ Our investigation focuses on the relation between unit activations and the orien
 - how individual neurons response across different orientations of static gratings
 - compare timing / pattern of spikes to identify any distinct temporal patterns among neurons
 
+## Decoding static vs drifting (02_hypothesis testing // probably not included in 2 page report)
+
+Before diving into decoding orientation we wanted to see how spike count and variability (across presentations) differed between static and drifting gratings in the visual cortex (VISam). We discovered that the spike count per presentation (spike mean) was generally much higher for the same units in drifting gratings than in static gratings. We tested these findings with a paired Wilcoxon signed-rank test (alpha=0.05) which revealed a signifcant p-value (0.000) allowing us to reject the null hypothesis that units fire equally frequently for static and drifting gratings. We then performed the same analysis on spike Coefficient of Variation (CV = std/mean) which revealed the reverse, units had greater variability when presented with static gratings (p-value 0.000). 
+    We then built a two Random Forest classifier with 5-fold cross validation using just spike_mean and spike_CV 
+respectively. Model 1 using spike_mean attained an accuracy of 1.000 +- 0.000 and model 2 using spike_CV attained 0.933 ± 0.033. Clearly it is easy to effectively decode whether the stimulus is static or drifting gratings from the simple measures such as spike count per presentation.
+    
+
 ## Firing Rate Baseline
 
 We first observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region, though some qualitative differences can be identified. 
