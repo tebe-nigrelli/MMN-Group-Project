@@ -122,9 +122,9 @@ Prior to model training, features were standardized using z-score normalization 
 
 For decoding orientation for static gratings we achieved an accuracy of
 
-Random Forest        - 0.8611
-SVM                  - 0.8333
-Logistic Regression  - 0.8889
+Random Forest        - 0.8611 /n
+SVM                  - 0.8333 /n
+Logistic Regression  - 0.8889 /n
 
 Feature selection // confusion matrices // maybe a bit more discussion    ???
 
