@@ -98,7 +98,7 @@ $DSI = (R_{preferred} - R_{opposite})/(R_{preferred} + R_{opposite})$
 
 Using the same selection criteria above except using DSI > 0.5 instead only 8 neurons were left over supporting this hypothesis.
 
-![](report_images/drifting_tuning_curves.png)
+![](report_images/Drifting_tuning_curves.png)
 
 
 # Decoding Orientation from Neural Activity
@@ -122,9 +122,9 @@ Prior to model training, features were standardized using z-score normalization 
 
 For decoding orientation for static gratings we achieved an accuracy of
 
-Random Forest        - 0.8611 /n
-SVM                  - 0.8333 /n
-Logistic Regression  - 0.8889 /n
+1) Random Forest        - 0.8611 
+2) SVM                  - 0.8333 
+3) Logistic Regression  - 0.8889 
 
 Feature selection // confusion matrices // maybe a bit more discussion    ???
 
@@ -134,9 +134,9 @@ Feature selection // confusion matrices // maybe a bit more discussion    ???
 
 For decoding orientation for drifting gratings we achieved an accuracy of 
 
-Random Forest        - 0.9167
-SVM                  - 1.0000
-Logistic Regression  - 1.0000
+1) Random Forest        - 0.9167
+2) SVM                  - 1.0000
+3) Logistic Regression  - 1.0000
 
 ![](report_images/drifting_feature_selection.png)
 ![](report_images/drifting_random_forest_confusion_matrix.png)
