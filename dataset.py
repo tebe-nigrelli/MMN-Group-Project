@@ -22,6 +22,10 @@ from allensdk.brain_observatory.ecephys.ecephys_session import EcephysSession
 Cache: TypeAlias = EcephysProjectCache
 Session: TypeAlias = EcephysSession
 
+IMAGE_DIR: Final[pathlib.Path] = pathlib.Path('./image/')
+"""Path to the image directory, relative to project root."""
+IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+
 CACHE_TIMEOUT: Final[int] = 30*60 # 30 minutes
 
 CACHE: Final[Cache] = EcephysProjectCache.from_warehouse(manifest=MANIFEST_PATH, timeout=CACHE_TIMEOUT)
