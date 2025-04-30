@@ -343,7 +343,23 @@ class FIELD(Constraint):
         df = df[m_new]
     return m
 
-def ensure_constraint(x: Any) -> Constraint:
+_C = TypeVar('_C', bound=Constraint)
+ConstraintLike: TypeAlias = Constraint|Any
+@overload
+def ensure_constraint(x: None) -> _TRUE: ...
+@overload
+def ensure_constraint(x: Mapping) -> FIELD: ...
+@overload
+def ensure_constraint(x: set) -> MEMBER: ...
+@overload
+def ensure_constraint(x: str) -> EQ: ...
+@overload
+def ensure_constraint(x: Iterable) -> OR: ...
+@overload
+def ensure_constraint(x: _C) -> _C: ...
+@overload
+def ensure_constraint(x: Any) -> EQ: ...
+def ensure_constraint(x: ConstraintLike) -> Constraint:
   if x is None:
     return TRUE
   if isinstance(x, Constraint):
@@ -356,7 +372,7 @@ def ensure_constraint(x: Any) -> Constraint:
     return OR(x)
   return EQ(x)
 
-def filter_df(df, constraint: Optional[Constraint|Any] = None, / , **field_constraints: Constraint|Any):
+def filter_df(df, constraint: Optional[ConstraintLike] = None, / , **field_constraints: ConstraintLike):
   if constraint is not None:
     df = df[ensure_constraint(constraint).mask(df)]
   if field_constraints:
@@ -364,12 +380,12 @@ def filter_df(df, constraint: Optional[Constraint|Any] = None, / , **field_const
   return df
 
 @overload
-def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FIELD) -> FIELD:
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FIELD) -> FIELD:
   ...
 @overload
-def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FieldDict) -> FieldDict:
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FieldDict) -> FieldDict:
   ...
-def add_field_constraint(field: str, constraint: Constraint|Any, field_constraint: FieldDict|FIELD) -> FieldDict|FIELD:
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FieldDict|FIELD) -> FieldDict|FIELD:
   if isinstance(field_constraint, dict):
     constraint_dict = field_constraint
   elif isinstance(field_constraint, FIELD):
