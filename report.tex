@@ -8,6 +8,7 @@
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{cleveref}
 
 % Handle figures in two-column layout better
 \usepackage{stfloats}
@@ -68,9 +69,11 @@ The tuning curves were similarly conveying diverse response profiles with very s
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.6\linewidth]{report_images/drifting_unit_mean_orientation.png}
+  \caption{Mean orientation preference of drifting units}
+  \label{fig:drifting_unit_mean_orientation}
 \end{figure}
 
-Moreover, unlike Static here the orientations spanned a full 360° with the 45° increments giving 8 different orientations. A very interesting result was that orientations 180° apart both had very strong responses, where the gratings has the same orientation but is drifting in the opposite direction. Indeed it seems the units in general seemed to be more selective to orientation than direction. We wanted to test this by investigating DSI (Direction-sensitivity index).
+Moreover, unlike Static here the orientations spanned a full 360° with the 45° increments giving 8 different orientations. A very interesting result was that orientations 180° apart both had very strong responses, where the gratings has the same orientation but is drifting in the opposite direction \ref{fig:drifting_unit_mean_orientation}. Indeed it seems the units in general seemed to be more selective to orientation than direction. We wanted to test this by investigating DSI (Direction-sensitivity index).
 
 Using the same selection criteria above except using DSI $>$ 0.5 instead only 8 neurons were left over supporting this hypothesis.
 
@@ -79,11 +82,11 @@ Using the same selection criteria above except using DSI $>$ 0.5 instead only 8 
 To assess whether the activity patterns of orientation-selective neurons could reliably predict stimulus orientation, we implemented a machine learning approach using the spike counts of selected neurons as features. The static dataset consisted of spike count responses to static grating stimuli presented at six distinct orientations. Whereas the drifting dataset the same but from 8 distinct orientations as direction is considered. The classification task involved predicting the stimulus orientation from the corresponding neural activity patterns.
 
 \subsection{Data Preparation and Model Training}
-We constructed a feature matrix with stimulus presentations as rows and the spike counts of a selected neurons as columns with the orientation values being the target variable. Prior to model training the dataset was stratified and split into training (70\%) and testing (30\%) sets to ensure proportional representation of orientation classes. We ended up with 20 presentations per orientation for static dataset whereas only 5 presentations per orientation for drifting dataset, a limitation to be considered.Features were standardized using z score normalization to account for differences in baseline firing rates. We then considered Random Forest Models, SVM with linear kernel and Logistic Regression.
+We constructed a feature matrix with stimulus presentations as rows and the spike counts of a selected neurons as columns with the orientation values being the target variable. Prior to model training the dataset was stratified and split into training (70\%) and testing (30\%) sets to ensure proportional representation of orientation classes. We ended up with 20 presentations per orientation for static dataset whereas only 5 presentations per orientation for drifting dataset, a limitation to be considered. Features were standardized using z score normalization to account for differences in baseline firing rates. We then considered Random Forest Models, SVM with linear kernel and Logistic Regression.
 
 \subsection{Classification performance}
 
-For static, all models performed with accuracy near 0.85, while drifting performed with near perfect accuracy. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though it must be acknowledged that the resolution changes between grating types, possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
+For static, all models performed with accuracy near 0.85 \ref{tab:static_performance}, while drifting performed with near perfect accuracy \ref{tab:drifting_performance}. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though it must be acknowledged that the resolution changes between grating types, possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
 
 \subsection{Cross condition analysis between static and drifting stimuli}
 
