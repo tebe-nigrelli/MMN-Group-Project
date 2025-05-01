@@ -40,19 +40,19 @@ In this study we look at static and drifting grating presentations, and consider
 
 \section{Exploratory Data Analysis}
 
-Due to the visible linear relation between the mean and the standard deviation of firing rates, it is intuitively true that they do not sufficiently characterize the brain regions [Figure \ref{fig:firing_rate_stats}].  Furthermore, as some regions contain little data, any possible spread is subject to noise [Figure \ref{fig:firing_rate_single}].
-
-\textit{And then what?}
+We observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region \ref{fig:firing_rate_stats}, though some qualitative differences can be identified. As some regions contain little data, spread is subject to noise \ref{fig:firing_rate_single}.
 
 \subsection{Decoding static vs drifting}
 
-A Wilcoxon signed-rank test indicated that for units in the \texttt{VISam} region of the visual cortex, the average spike rate over static presentations was higher than over drifting presentations (Figure \ref{fig:spike_mean}, \(z=0.0\), \(p<.001\)), and the coefficient of variation lower (\ref{fig:spike_cv}, \(z=16.0\), \(p<.001\)).
+A Wilcoxon signed-rank test indicated that for units in the \texttt{VISam} region of the visual cortex, the average spike rate over static presentations was higher than over drifting presentations (Figure \ref{fig:spike_mean}, \(z=0.0\), \(p<.001\)), and the coefficient of variation lower (Figure \ref{fig:spike_cv}, \(z=16.0\), \(p<.001\)).
+
+For reference, we trained a Random Forest classifier with 5-fold training to predict static from drifting, given either spike\_mean or spike\_CV: spike\_mean gave an accuracy of 1 and spike\_CV attained 0.93.
 
 \section{Selection of Neurons}
 
 For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit,
 \[\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}\]
-where \(r_\alpha\) is the average firing rate of a unit over presentations with orientation \alpha, \(\theta^*\) is the value which maximizes \(r_{\theta^*}\), and \(\bar\theta\) is the angle orthogonal to \(\theta^*\).
+where \( r_\alpha \) is the average firing rate of a unit over presentations with orientation \( \alpha \), \( \theta^* = \arg\max_\theta r_\theta \) is the value which maximizes the firing rate, and \( \bar{\theta} \) is the angle orthogonal to \( \theta^* \).
 
 We identify and select a highly selective subset of units with \(\textrm{OSI} > .5\).  Furthermore, we select units which have unequal firing rates throughout orientations with a one-way ANOVA test (\(\alpha = 0.05\)).  Finally, we narrow the list of units we look at to those which both have high OSI values and for those which have an unequal distribution.
 
@@ -62,7 +62,7 @@ Our approach when looking at static stimuli yielded 43 units, which showed notab
 
 Visualization of orientation tuning curves from representative neurons [Figure \ref{fig:static_tuning}] reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and Neurons with a broader reaction to different orientations.
 
-The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli.
+The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli [Figure \ref{fig:static_tuning}].
 
 \subsection{Drifting}
 
@@ -79,7 +79,7 @@ The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] convey
   \label{fig:drifting_unit_mean_orientation}
 \end{figure}
 
-One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart.  These units are likely those which respond solely to the orientation and not the drifting.
+One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart.  These units are likely those which respond solely to the orientation and not the drifting [Figure \ref{fig:drifting_unit_mean_orientation}].
 
 For this, we define the Direction Sensitivity Index (DSI), which is the same as the OSI, but where \(\bar\theta\) is opposite to \(\theta^*\) as opposed to orthogonal.  Only 8 units among the 81 that were originally chosen exhibited a DSI value greater than 0.5, which supports our hypothesis that these units are more correlated to orientation than to the drifting itself.
 
@@ -92,11 +92,11 @@ We constructed a feature matrix with stimulus presentations as rows and the spik
 
 \subsection{Classification performance}
 
-For static, all models performed with accuracy near 0.85 \ref{tab:static_performance}, while drifting performed with near perfect accuracy \ref{tab:drifting_performance}. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though it must be acknowledged that the resolution changes between grating types, possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
+For static, all models performed with accuracy near 0.85 [Table \ref{tab:static_performance}], while drifting performed with near perfect accuracy [Table \ref{tab:drifting_performance}]. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though it must be acknowledged that the resolution changes between grating types, possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
 
 \subsection{Cross condition analysis between static and drifting stimuli}
 
-At this point we wanted to dig deeper into the difference in OSI between static and drifting gratings by looking at the distribution of the OSI values \ref{fig:tuning_comparison}. 
+At this point we wanted to dig deeper into the difference in OSI between static and drifting gratings by looking at the distribution of the OSI values [Figure \ref{fig:tuning_comparison}]. 
 
 \[
 \begin{array}{|l|c|c|}
@@ -119,7 +119,7 @@ Interestingly we see these results in the feature selection of our random forest
 
 \subsubsection{Distribution and Overlap of Selective Neurons Across Regions}
 
-The distribution of well-tuned neurons across brain regions is very similar, with approximately twice as many well-tuned neurons for drifting compared to static gratings \ref{fig:tuned_regions}. Notably, VISl appears to have greater relative importance for static stimuli, whereas VISrl is more prominent for drifting. Furthermore, of the 43 units identified as significant for static gratings, 29 were also significant for drifting gratings. This substantial overlap indicates that many of the same neurons are involved in processing orientation for both stimulus types, which aligns with expectations.
+The distribution of well-tuned neurons across brain regions is very similar, with approximately twice as many well-tuned neurons for drifting compared to static gratings [Figure \ref{fig:tuned_regions}]. Notably, VISl appears to have greater relative importance for static stimuli, whereas VISrl is more prominent for drifting. Furthermore, of the 43 units identified as significant for static gratings, 29 were also significant for drifting gratings. This substantial overlap indicates that many of the same neurons are involved in processing orientation for both stimulus types, which aligns with expectations.
 
 \section{Limitations and Further Work}
 
@@ -198,19 +198,6 @@ grey   &  1 \\
 \label{tab:chosen-regions-drifting}
 \end{table}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.85\linewidth]{report_images/spike_mean_comparison.png}
-\caption{Spike mean: static and drifting}
-\label{fig:spike_mean}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.85\linewidth]{report_images/spike_CV_comparison.png}
-\caption{Spike CV: static and drifting.}
-\label{fig:spike_cv}
-\end{figure}
 
 \begin{figure}[ht]
 \centering
