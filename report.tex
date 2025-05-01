@@ -10,6 +10,8 @@
 \usepackage{subcaption}
 \usepackage{cleveref}
 
+\usepackage{siunitx}
+
 % Handle figures in two-column layout better
 \usepackage{stfloats}
 
@@ -26,45 +28,49 @@
 \maketitle
 
 \begin{abstract}
-We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We identify brain regions and specific neurons that have a significant role in encoding stimulus orientation. We combine neural firing rate over multiple trials and conditions, and select the most informative neurons based on their response. Finally, we construct an  effective decoder to predict stimulus orientation from neural activity.
+We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We identify brain regions and specific neurons that have a significant role in encoding stimulus orientation. We combine neural firing rate over multiple trials and conditions, and select the most informative neurons based on their response. Finally, we construct an effective decoder to predict stimulus orientation from neural activity.
 \end{abstract}
 
 
 \section{Data Processing}
 
-We selected session \textit{750332458} from the \textit{AllenSDK} dataset for its balanced presence of units between regions, especially those related to the visual cortex \ref{tab:regions}. The dataset consists of time-aligned responses of neuronal units to stimuli. We restrict the data to firing rate as the only feature, grouping responses by stimulus orientation, and focusing our study on the mean firing rate of each unit - neuron.
+For our analysis, we chose \cite{Allen:750332458} for its balanced distribution of units across regions of the brain, and for its coverage of the visual cortex [Table \ref{tab:regions}].  This dataset consists of time-aligned responses of neuronal units to stimuli.
+
+In this study we look at static and drifting grating presentations, and consider as the variable only the orientation and as the response only the mean firing rate of individual units over each presentation.
 
 \section{Exploratory Data Analysis}
 
-We observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region \ref{fig:firing_rate_stats}, though some qualitative differences can be identified. As some regions contain little data, spread is subject to noise \ref{fig:firing_rate_single}.
+Due to the visible linear relation between the mean and the standard deviation of firing rates, it is intuitively true that they do not sufficiently characterize the brain regions [Figure \ref{fig:firing_rate_stats}].  Furthermore, as some regions contain little data, any possible spread is subject to noise [Figure \ref{fig:firing_rate_single}].
+
+\textit{And then what?}
 
 \subsection{Decoding static vs drifting}
 
-As a preliminary step, we study spike count and trial variability between static and drifting stimuli in the visual cortex - VISam. In the same unit, spike count per presentation (spike mean) is much higher in the drifting stimulus \ref{fig:spike_mean}. Testing this with a paired Wilcoxon signed-rank test reveals a p-value of 0, showing a uneven firing rates between static and drifting. We then perform the same analysis on spike Coefficient of Variation, showing the opposite: units have greater variability when presented with static gratings (p-value 0) \ref{fig:spike_cv}.
-
-For reference, we trained a Random Forest classifier with 5-fold training to predict static from drifting, given either spike\_mean or spike\_CV: spike\_mean gave an accuracy of 1 and spike\_CV attained 0.93.
+A Wilcoxon signed-rank test indicated that for units in the \texttt{VISam} region of the visual cortex, the average spike rate over static presentations was higher than over drifting presentations (Figure \ref{fig:spike_mean}, \(z=0.0\), \(p<.001\)), and the coefficient of variation lower (\ref{fig:spike_cv}, \(z=16.0\), \(p<.001\)).
 
 \section{Selection of Neurons}
 
-We use the Orientation Selectivity Index (OSI) to identify a highly selective subset of neurons (OSI $>$ 0.5).
+For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit,
+\[\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}\]
+where \(r_\alpha\) is the average firing rate of a unit over presentations with orientation \alpha, \(\theta^*\) is the value which maximizes \(r_{\theta^*}\), and \(\bar\theta\) is the angle orthogonal to \(\theta^*\).
 
-We used one-way ANOVA test for validation, comparing spike counts across different orientations, taking as null hypothesis that mean is equal across all orientations. The test identified a substantial population of neurons (p $<$ 0.05) exhibiting statistically significant orientation tuning.
-
-We selected neurons with High orientation selectivity and Statistically significant orientation tuning.
+We identify and select a highly selective subset of units with \(\textrm{OSI} > .5\).  Furthermore, we select units which have unequal firing rates throughout orientations with a one-way ANOVA test (\(\alpha = 0.05\)).  Finally, we narrow the list of units we look at to those which both have high OSI values and for those which have an unequal distribution.
 
 \subsection{Static}
 
-This approach yielded a population of 43 orientation-selective neurons distributed in the visual cortex, with notable concentrations in the VISal and VISl areas. The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain.
+Our approach when looking at static stimuli yielded 43 units, which showed notable concentrations in the Visual Cortex, specifically the \texttt{VISal} and \texttt{VISl} areas [Table \ref{tab:chosen-regions-static}].  The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain.
 
-Visualization of orientation tuning curves from representative neurons revealed diverse response profiles, including: narrowly tuned neurons with a strong response to one specific orientation, and Neurons with a broader reaction to a few concurrent orientations.
+Visualization of orientation tuning curves from representative neurons [Figure \ref{fig:static_tuning}] reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and Neurons with a broader reaction to different orientations.
 
-These different tuning properties are likely beneficial to the encoding of orientation in the visual cortex, helping to discriminate between different orientations of visual stimuli. Tuning curves for static gratings can be found in Figure \ref{fig:static_tuning} in Appendix A.
+The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli.
 
 \subsection{Drifting}
 
-The same approach for drifting gratings was then employed with the same selection criteria. It revealed 81 orientation-selective neurons (almost double) many of which had higher OSI values between 0.8-1.0. Similarly, all were located in the visual cortex, predominantly in VISal, bar one which was in 'grey'.
+Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in \texttt{VISal}, bar one which was in \texttt{grey} [Table \ref{tab:chosen-regions-drifting}].
 
-The tuning curves were similarly conveying diverse response profiles with very strong responses to specific orientations \ref{fig:drifting_tuning}. Though, the drifting tuning curves showed more peakedness around the preferred orientation, this is probably largely due to the fact that the difference between adjacent orientations is 45° instead of 30° and is not solely because the grating is drifting.
+A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°.
+
+The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
 
 \begin{figure}[h]
   \centering
@@ -73,9 +79,9 @@ The tuning curves were similarly conveying diverse response profiles with very s
   \label{fig:drifting_unit_mean_orientation}
 \end{figure}
 
-Moreover, unlike Static here the orientations spanned a full 360° with the 45° increments giving 8 different orientations. A very interesting result was that orientations 180° apart both had very strong responses, where the gratings has the same orientation but is drifting in the opposite direction \ref{fig:drifting_unit_mean_orientation}. Indeed it seems the units in general seemed to be more selective to orientation than direction. We wanted to test this by investigating DSI (Direction-sensitivity index).
+One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart.  These units are likely those which respond solely to the orientation and not the drifting.
 
-Using the same selection criteria above except using DSI $>$ 0.5 instead only 8 neurons were left over supporting this hypothesis.
+For this, we define the Direction Sensitivity Index (DSI), which is the same as the OSI, but where \(\bar\theta\) is opposite to \(\theta^*\) as opposed to orthogonal.  Only 8 units among the 81 that were originally chosen exhibited a DSI value greater than 0.5, which supports our hypothesis that these units are more correlated to orientation than to the drifting itself.
 
 \section{Decoding Orientation from Neural Activity}
 
@@ -155,7 +161,58 @@ DG     &   7 \\
 \label{tab:regions}
 \end{table}
 
-\begin{figure}[H]
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+region & count \\
+\midrule
+VISal  & 15 \\
+VISl   & 10 \\
+VISp   &  9 \\
+VISam  &  6 \\
+VISrl  &  2 \\
+grey   &  1 \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of units chosen for static gratings across brain regions}
+\label{tab:chosen-regions-static}
+\end{table}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+region & count \\
+\midrule
+VISal  & 29 \\
+VISp   & 19 \\
+VISam  & 13 \\
+VISl   & 10 \\
+VISrl  &  9 \\
+VISpm  &  2 \\
+grey   &  1 \\
+\bottomrule
+\end{tabular}
+\caption{Distribution of units chosen for drifting gratings across brain regions}
+\label{tab:chosen-regions-drifting}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{report_images/spike_mean_comparison.png}
+\caption{Spike mean: static and drifting}
+\label{fig:spike_mean}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{report_images/spike_CV_comparison.png}
+\caption{Spike CV: static and drifting.}
+\label{fig:spike_cv}
+\end{figure}
+
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{report_images/unit_firing_rate_statistics.png}
 \caption{Firing rate statistics across brain regions.}
