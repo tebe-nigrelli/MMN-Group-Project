@@ -28,13 +28,13 @@
 \maketitle
 
 \begin{abstract}
-We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We identify brain regions and specific neurons that have a significant role in encoding stimulus orientation. We combine neural firing rate over multiple trials and conditions, and select the most informative neurons based on their response. Finally, we construct an effective decoder to predict stimulus orientation from neural activity.
+We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We find that drifting gratings elicit responses from more neurons with higher orientation selectivity, leading to better decoding performance. However, static stimuli activate a smaller subset of highly selective neurons with greater individual impact. We identify brain regions and specific neurons that play a significant role in encoding stimulus orientation, combine neural firing rates over multiple trials and conditions, select the most informative neurons based on their response, and construct an effective decoder to predict stimulus orientation from neural activity.
 \end{abstract}
 
 
 \section{Data Processing}
 
-For our analysis, we chose \cite{Allen:750332458} for its balanced distribution of units across regions of the brain, and for its coverage of the visual cortex [Table \ref{tab:regions}].  This dataset consists of time-aligned responses of neuronal units to stimuli.
+For our analysis, we chose $750332458$ for its balanced distribution of units across regions of the brain, and for its coverage of the visual cortex [Table \ref{tab:regions}].  This dataset consists of time-aligned responses of neuronal units to stimuli.
 
 In this study we look at static and drifting grating presentations, and consider as the variable only the orientation and as the response only the mean firing rate of individual units over each presentation.
 
@@ -42,17 +42,11 @@ In this study we look at static and drifting grating presentations, and consider
 
 We observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region \ref{fig:firing_rate_stats}, though some qualitative differences can be identified. As some regions contain little data, spread is subject to noise \ref{fig:firing_rate_single}.
 
-\subsection{Decoding static vs drifting}
-
-A Wilcoxon signed-rank test indicated that for units in the \texttt{VISam} region of the visual cortex, the average spike rate over static presentations was higher than over drifting presentations (Figure \ref{fig:spike_mean}, \(z=0.0\), \(p<.001\)), and the coefficient of variation lower (Figure \ref{fig:spike_cv}, \(z=16.0\), \(p<.001\)).
-
-For reference, we trained a Random Forest classifier with 5-fold training to predict static from drifting, given either spike\_mean or spike\_CV: spike\_mean gave an accuracy of 1 and spike\_CV attained 0.93.
-
 \section{Selection of Neurons}
 
 For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit,
 \[\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}\]
-where \( r_\alpha \) is the average firing rate of a unit over presentations with orientation \( \alpha \), \( \theta^* = \arg\max_\theta r_\theta \) is the value which maximizes the firing rate, and \( \bar{\theta} \) is the angle orthogonal to \( \theta^* \).
+where $r_\alpha$ is the average firing rate of a unit over presentations with orientation $\alpha$, $\theta^* = \arg\max_\theta r_\theta$ is the orientation that elicits the maximum firing rate, and $\bar{\theta} = \theta^* + 90^\circ$ (modulo 180°) is the orientation orthogonal to $\theta^*$.
 
 We identify and select a highly selective subset of units with \(\textrm{OSI} > .5\).  Furthermore, we select units which have unequal firing rates throughout orientations with a one-way ANOVA test (\(\alpha = 0.05\)).  Finally, we narrow the list of units we look at to those which both have high OSI values and for those which have an unequal distribution.
 
@@ -126,6 +120,8 @@ The distribution of well-tuned neurons across brain regions is very similar, wit
 Comparing model performance between static and drifting gratings is limited by the high discrepancy in resolution: static has 30° and while 45° in drifting. This does not limit comparative analysis for OSI as this uses orthogonal values for stimulus count, the same for both. A comparative study with the same resolution could refine our results.
 
 This investigation was limited to a single session, for a mouse. Repeating the study with other sessions would validate results.
+
+Additionally, our analysis relied solely on mean firing rates across trials, which may overlook informative temporal response patterns that could enhance decoding performance or reveal finer aspects of orientation encoding.
 
 We used gratings to infer how orientation is encoded, but it remains to be validated if other oriented stimuli are similarly encoded.
 
