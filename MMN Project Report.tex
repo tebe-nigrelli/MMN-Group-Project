@@ -2,7 +2,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{booktabs}
-\usepackage[margin=0.5in, top=0.2in, bottom=0.5in]{geometry}
+\usepackage[margin=0.55in, top=0.2in, bottom=0.47in]{geometry}
 \usepackage{authblk}
 \usepackage{hyperref}
 \usepackage{float}
@@ -10,22 +10,28 @@
 \usepackage{subcaption}
 \usepackage{cleveref}
 
-\usepackage{siunitx}
-
 % Handle figures in two-column layout better
 \usepackage{stfloats}
 
-% Title formatting
 \title{\Large \textbf{Neuron Responses to Grating Stimulus Orientations in Mice}}
 
 \author{
   Umut Tuna Akgul, Utku Bahcivanoglu, Tommaso Ferracina, George Morris, Tebe Nigrelli
 }
 
+\date{\today\\ [1ex] \hrule}
+
+\makeatletter
+\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}%
+  {0.8ex plus 0.2ex minus 0.2ex}%
+  {0.5ex plus 0.2ex}%
+  {\normalfont\normalsize\bfseries}}
+\makeatother
 
 \begin{document}
 
 \maketitle
+\pagestyle{empty}
 
 \begin{abstract}
 We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We find that drifting gratings elicit responses from more neurons with higher orientation selectivity, leading to better decoding performance. However, static stimuli activate a smaller subset of highly selective neurons with greater individual impact. We identify brain regions and specific neurons that play a significant role in encoding stimulus orientation, combine neural firing rates over multiple trials and conditions, select the most informative neurons based on their response, and construct an effective decoder to predict stimulus orientation from neural activity.
