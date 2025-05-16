@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Callable, Collection, Iterable, Mapping, TypeVar
+from typing import Any, Callable, Collection, Final, Iterable, Mapping, Optional, TypeAlias, TypeVar, overload
 import pandas as pd
 
 """
@@ -149,6 +149,20 @@ class Constraint():
   def mask(self, df: pd.DataFrame|pd.Series) -> pd.Series:
     return df.apply(self.__contains__)
 
+class _TRUE(Constraint):
+  """Always true constraint."""
+  def __init__(self): return
+  def __contains__(self, obj): return True
+  def mask(self, df): return pd.Series(True, index=df.index)
+
+class _FALSE(Constraint):
+  def __init__(self): return
+  def __contains__(self, obj): return False
+  def mask(self, df): return pd.Series(False, index=df.index)
+
+TRUE: Final[_TRUE] = _TRUE()
+FALSE: Final[_FALSE] = _FALSE()
+
 class _ContainerConstraint(Constraint):
   """Convenience class to define `_AndConstraint` and `_OrConstraint`,
   which both take either an iterable of constraints or some amount of
@@ -185,7 +199,7 @@ class OR(_ContainerConstraint):
     return any(obj in c for c in self.cs)
 
   def mask(self, df):
-    m = pd.Series([False] * df.shape[0], index=df.index)
+    m = pd.Series(False, index=df.index)
     for c in self.cs:
       m_new = c.mask(df)
       m |= m_new
@@ -201,7 +215,7 @@ class AND(_ContainerConstraint):
     return all(obj in c for c in self.cs)
 
   def mask(self, df):
-    m = pd.Series([True]*df.shape[0], index=df.index)
+    m = pd.Series(True, index=df.index)
     for c in self.cs:
       m_new = c.mask(df)
       m &= m_new
@@ -280,7 +294,7 @@ class RANGE(Constraint):
       and ((self.ub is None) or ((self.ub > obj) if self.ub_strict else (self.ub >= obj)))
 
   def mask(self, df):
-    m = pd.Series([True]*df.shape[0], index=df.index)
+    m = pd.Series(True, index=df.index)
     if self.lb is not None:
       m &= (self.lb < df) if self.lb_strict else (self.lb <= df)
     if self.ub is not None:
@@ -292,13 +306,15 @@ _V1 = TypeVar('_V1')
 _V2 = TypeVar('_V2')
 def _map_dict(func: Callable[[_V1],_V2], m: dict[_K, _V1]) -> dict[_K, _V2]:
   return {k:func(v) for k,v in m.items()}
-  
+
+FieldDict: TypeAlias = dict[str, Constraint|Any]
+
 class FIELD(Constraint):
   """Match object if each of its field matches the corresponding constraint."""
 
-  def __init__(self, **kwargs: Mapping[str,Constraint|Any]):
+  def __init__(self, **kwargs: Constraint|Any):
     self.total = kwargs.get('__total__', True)
-    self.fields = _map_dict(ensure_constraint, kwargs)
+    self.fields: FieldDict = _map_dict(ensure_constraint, kwargs)
 
   def __contains__(self, obj):
     for field, constraint in self.fields.items():
@@ -313,8 +329,8 @@ class FIELD(Constraint):
     return True
 
   def mask(self, df):
-    empty_mask = pd.Series([False] * df.shape[0], index=df.index)
-    m = pd.Series([True] * df.shape[0], index=df.index)
+    empty_mask = pd.Series(False, index=df.index)
+    m = pd.Series(True, index=df.index)
     for colname, constraint in self.fields.items():
       try:
         x = df[colname]
@@ -327,7 +343,25 @@ class FIELD(Constraint):
         df = df[m_new]
     return m
 
-def ensure_constraint(x: Any) -> Constraint:
+_C = TypeVar('_C', bound=Constraint)
+ConstraintLike: TypeAlias = Constraint|Any
+@overload
+def ensure_constraint(x: None) -> _TRUE: ...
+@overload
+def ensure_constraint(x: Mapping) -> FIELD: ...
+@overload
+def ensure_constraint(x: set) -> MEMBER: ...
+@overload
+def ensure_constraint(x: str) -> EQ: ...
+@overload
+def ensure_constraint(x: Iterable) -> OR: ...
+@overload
+def ensure_constraint(x: _C) -> _C: ...
+@overload
+def ensure_constraint(x: Any) -> EQ: ...
+def ensure_constraint(x: ConstraintLike) -> Constraint:
+  if x is None:
+    return TRUE
   if isinstance(x, Constraint):
     return x
   if isinstance(x, Mapping):
@@ -338,5 +372,30 @@ def ensure_constraint(x: Any) -> Constraint:
     return OR(x)
   return EQ(x)
 
-def filter_df(df, constraint):
-  return df[ensure_constraint(constraint).mask(df)]
+def filter_df(df, constraint: Optional[ConstraintLike] = None, / , **field_constraints: ConstraintLike):
+  if constraint is not None:
+    df = df[ensure_constraint(constraint).mask(df)]
+  if field_constraints:
+    df = df[FIELD(**field_constraints).mask(df)]
+  return df
+
+@overload
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FIELD) -> FIELD:
+  ...
+@overload
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FieldDict) -> FieldDict:
+  ...
+def add_field_constraint(field: str, constraint: ConstraintLike, field_constraint: FieldDict|FIELD) -> FieldDict|FIELD:
+  if isinstance(field_constraint, dict):
+    constraint_dict = field_constraint
+  elif isinstance(field_constraint, FIELD):
+    constraint_dict = field_constraint.fields
+  else:
+    raise Exception("Invalid `field_constraint`")
+
+  if field in constraint_dict:
+    constraint_dict[field] = AND(constraint_dict[field], constraint)
+  else:
+    constraint_dict[field] = constraint
+
+  return field_constraint
