@@ -2,6 +2,7 @@
 !report_images/
 !report_images/**
 !.gitignore
+!references.bib
 
 !*.tex
 !*.md

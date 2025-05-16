@@ -9,6 +9,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{cleveref}
+\usepackage{cite}
+\usepackage{url}
 
 % Handle figures in two-column layout better
 \usepackage{stfloats}
@@ -35,7 +37,7 @@
 \pagestyle{empty}
 
 \begin{abstract}
-  We analyze ecephys data from the Allen Brain Observatory to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We find that drifting gratings elicit responses from more neurons with higher orientation selectivity, leading to better decoding performance. However, static stimuli activate a smaller subset of highly selective neurons with greater individual impact. We identify brain regions and specific neurons that play a significant role in encoding stimulus orientation, combine neural firing rates over multiple trials and conditions, select the most informative neurons based on their response, and construct an effective decoder to predict stimulus orientation from neural activity.
+  We analyze ecephys data from the Allen Brain Observatory \cite{allen_brain_observatory} to investigate how neural units in the mouse visual cortex respond to static and drifting gratings stimuli. We find that drifting gratings elicit responses from more neurons with higher orientation selectivity, leading to better decoding performance. However, static stimuli activate a smaller subset of highly selective neurons with greater individual impact. We identify brain regions and specific neurons that play a significant role in encoding stimulus orientation, combine neural firing rates over multiple trials and conditions, select the most informative neurons based on their response, and construct an effective decoder to predict stimulus orientation from neural activity.
 \end{abstract}
 
 \section{Data Processing}
@@ -50,7 +52,7 @@ We observe how spiking rate varies between regions: in general, we notice a line
 
 \section{Selection of Neurons}
 
-For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit,
+For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit \cite{ringach2002orientation},
 \[\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}\]
 where $r_\alpha$ is the average firing rate of a unit over presentations with orientation $\alpha$, $\theta^* = \arg\max_\theta r_\theta$ is the orientation that elicits the maximum firing rate, and $\bar{\theta} = \theta^* + 90^\circ$ (modulo 180°) is the orientation orthogonal to $\theta^*$.
 
@@ -58,13 +60,13 @@ We identify and select a highly selective subset of units with \(\textrm{OSI} > 
 
 \subsection{Static}
 
-Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the \texttt{VISal} and \texttt{VISl} areas [Table \ref{tab:chosen-regions-combined}].  The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain.
+Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the \texttt{VISal} and \texttt{VISl} areas [Table \ref{tab:chosen-regions-combined}].  
 Visualization of orientation tuning curves from representative neurons [Figure \ref{fig:static_tuning}] reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and neurons with a broader reaction to different orientations.
 The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli [Figure \ref{fig:static_tuning}].
 
 \subsection{Drifting}
 
-Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in \texttt{VISal}, bar one which was in \texttt{grey} [Table \ref{tab:chosen-regions-drifting}]- A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°. The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
+Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in \texttt{VISal} \cite{wang2007area}, bar one which was in \texttt{grey} [Table \ref{tab:chosen-drifting}]. A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°. The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
 
 \begin{figure}[h]
   \centering
@@ -75,7 +77,7 @@ Our approach when looking at drifting stimuli, instead revealed 81 units -- almo
 
 One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart [Figure \ref{fig:drifting_unit_mean_orientation}].  This behaviour suggests these units are more responsive to orinetation than direction of the drifting grating.
 
-For this, we define the Direction Sensitivity Index (DSI), which is the same as the OSI, but where \(\bar\theta\) is opposite to \(\theta^*\) as opposed to orthogonal.  Only 8 units exhibited a DSI value greater than 0.5, which supports our hypothesis that more units are correlated to orientation than to the drifting itself.
+For this, we define the Direction Sensitivity Index (DSI) \cite{niell2008highly}, which is the same as the OSI, but where \(\bar\theta\) is opposite to \(\theta^*\) as opposed to orthogonal.  Only 8 units exhibited a DSI value greater than 0.5, which supports our hypothesis that more units are correlated to orientation than to the drifting itself.
 
 \section{Decoding Orientation from Neural Activity}
 
@@ -122,6 +124,9 @@ Comparing model performance between static and drifting gratings is limited by t
 It is possible to decode gratings orientation from neural response using spike counts. This method is especially effective in drifting gratings, where units have higher OSI values and are selective. However, OSI values for selective neurons in static gratings are much higher, as is apparent from higher kurtosis, and is confirmed by feature importance in the model.
 
 \newpage
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 \appendix
 
