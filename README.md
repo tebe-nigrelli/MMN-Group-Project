@@ -21,7 +21,9 @@ We observe how spiking rate varies between regions: in general, we notice a line
 ## Selection of Neurons
 
 For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit [2],
+
 $$\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}$$
+
 where $r_\alpha$ is the average firing rate of a unit over presentations with orientation $\alpha$, $\theta^* = \arg\max_\theta r_\theta$ is the orientation that elicits the maximum firing rate, and $\bar{\theta} = \theta^* + 90^\circ$ (modulo 180°) is the orientation orthogonal to $\theta^*$.
 
 We identify and select a highly selective subset of units with $\textrm{OSI} > .5$.  Furthermore, we select units which have unequal firing rates throughout orientations with a one-way ANOVA test ($\alpha = 0.05$).  Finally, we narrow the list of units we look at to those which both have high OSI values and for those which have an unequal distribution.
@@ -118,136 +120,33 @@ It is possible to decode gratings orientation from neural response using spike c
 <table>
   <tr>
     <th>region</th>
-    <th>count</th>
+    <th>Total</th>
+    <th>Static</th>
+    <th>Drifting</th>
   </tr>
-  <tr>
-    <td>grey</td>
-    <td>558</td>
-  </tr>
-  <tr>
-    <td>VISal</td>
-    <td>71</td>
-  </tr>
-  <tr>
-    <td>VISp</td>
-    <td>63</td>
-  </tr>
-  <tr>
-    <td>VISam</td>
-    <td>60</td>
-  </tr>
-  <tr>
-    <td>VISrl</td>
-    <td>44</td>
-  </tr>
-  <tr>
-    <td>VISl</td>
-    <td>38</td>
-  </tr>
-  <tr>
-    <td>VISpm</td>
-    <td>19</td>
-  </tr>
-  <tr>
-    <td>CA1</td>
-    <td>16</td>
-  </tr>
-  <tr>
-    <td>CA3</td>
-    <td>15</td>
-  </tr>
-  <tr>
-    <td>DG</td>
-    <td>7</td>
-  </tr>
+  <tr><td>grey</td><td>558</td><td>1</td><td>1</td></tr>
+  <tr><td>VISal</td><td>71</td><td>15</td><td>29</td></tr>
+  <tr><td>VISp</td><td>63</td><td>9</td><td>19</td></tr>
+  <tr><td>VISam</td><td>60</td><td>6</td><td>13</td></tr>
+  <tr><td>VISrl</td><td>44</td><td>2</td><td>9</td></tr>
+  <tr><td>VISl</td><td>38</td><td>10</td><td>10</td></tr>
+  <tr><td>VISpm</td><td>19</td><td>0</td><td>2</td></tr>
+  <tr><td>CA1</td><td>16</td><td>0</td><td>0</td></tr>
+  <tr><td>CA3</td><td>15</td><td>0</td><td>0</td></tr>
+  <tr><td>DG</td><td>7</td><td>0</td><td>0</td></tr>
 </table>
-<p><strong>Table 1:</strong> Distribution of units across brain regions.
-</p>
+<p><strong>Table 1, 2, and 3 combined:</strong> Distribution of units across brain regions for all conditions: total, static gratings, and drifting gratings.</p>
 </div>
 
-<div align="center">
-<table style="float:left; width:48%">
-  <caption>Static gratings</caption>
-  <tr>
-    <th>region</th>
-    <th>count</th>
-  </tr>
-  <tr>
-    <td>VISal</td>
-    <td>15</td>
-  </tr>
-  <tr>
-    <td>VISl</td>
-    <td>10</td>
-  </tr>
-  <tr>
-    <td>VISp</td>
-    <td>9</td>
-  </tr>
-  <tr>
-    <td>VISam</td>
-    <td>6</td>
-  </tr>
-  <tr>
-    <td>VISrl</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td>grey</td>
-    <td>1</td>
-  </tr>
-</table>
-
-<table style="float:right; width:48%">
-  <caption>Drifting gratings</caption>
-  <tr>
-    <th>region</th>
-    <th>count</th>
-  </tr>
-  <tr>
-    <td>VISal</td>
-    <td>29</td>
-  </tr>
-  <tr>
-    <td>VISp</td>
-    <td>19</td>
-  </tr>
-  <tr>
-    <td>VISam</td>
-    <td>13</td>
-  </tr>
-  <tr>
-    <td>VISl</td>
-    <td>10</td>
-  </tr>
-  <tr>
-    <td>VISrl</td>
-    <td>9</td>
-  </tr>
-  <tr>
-    <td>VISpm</td>
-    <td>2</td>
-  </tr>
-  <tr>
-    <td>grey</td>
-    <td>1</td>
-  </tr>
-</table>
-<div style="clear:both;"></div>
-  <p><strong>Table 2:</strong> Distribution of units chosen for static and drifting gratings across brain regions.
-  </p>
-</div>
-
-<div style="clear:both;"></div>
-
-<div align="center">
-  <img src="report_images/unit_firing_rate_statistics.png" width="100%">
-  <p><strong>Figure 2:</strong> Firing rate statistics across brain regions.</p>
-</div>
-
-<div align="center">
-  <img src="report_images/unit_firing_rate_statistics_single.png" width="100%">
-  <p><strong>Figure 3:</strong> Individual firing rate statistics for each brain region.</p>
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <div style="text-align: center; width: 48%;">
+    <img src="report_images/unit_firing_rate_statistics.png" style="width: 100%;">
+    <p><strong>Figure 2:</strong> Firing rate statistics across brain regions.</p>
+  </div>
+  <div style="text-align: center; width: 48%;">
+    <img src="report_images/unit_firing_rate_statistics_single.png" style="width: 100%;">
+    <p><strong>Figure 3:</strong> Individual firing rate statistics for each brain region.</p>
+  </div>
 </div>
 
 <div align="center">
@@ -327,7 +226,7 @@ It is possible to decode gratings orientation from neural response using spike c
   </p>
 </div>
 
-Feature selection for static gratings is visualized in Figure 7a in Appendix A. The confusion matrices for Random Forest, SVM, and Logistic Regression models for static gratings are presented in Figures 8a and 9 in Appendix A.
+Feature selection for static gratings is visualized in Figure 7a in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for static gratings are presented in Figures 8a and 9 in the Appendix.
 
 <div align="center">
 <table>
@@ -352,7 +251,7 @@ Feature selection for static gratings is visualized in Figure 7a in Appendix A. 
   </p>
 </div>
 
-Feature selection for drifting gratings is visualized in Figure 7b in Appendix A. The confusion matrices for Random Forest, SVM, and Logistic Regression models for drifting gratings are presented in Figures 8b and 10 in Appendix A.
+Feature selection for drifting gratings is visualized in Figure 7b in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for drifting gratings are presented in Figures 8b and 10 in the Appendix.
 
 <div align="center">
   <img src="report_images/drifting_SVM_LogR_confusion_matrix.png" width="100%">
