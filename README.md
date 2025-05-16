@@ -114,8 +114,6 @@ It is possible to decode gratings orientation from neural response using spike c
 
 ## Appendix
 
-### Table 1: Distribution of units across brain regions.
-
 <div align="center">
 <table>
   <tr>
@@ -163,9 +161,9 @@ It is possible to decode gratings orientation from neural response using spike c
     <td>7</td>
   </tr>
 </table>
+<p><strong>Table 1:</strong> Distribution of units across brain regions.
+</p>
 </div>
-
-### Table 2: Distribution of units chosen for static and drifting gratings across brain regions.
 
 <div align="center">
 <table style="float:left; width:48%">
@@ -235,6 +233,9 @@ It is possible to decode gratings orientation from neural response using spike c
     <td>1</td>
   </tr>
 </table>
+<div style="clear:both;"></div>
+  <p><strong>Table 2:</strong> Distribution of units chosen for static and drifting gratings across brain regions.
+  </p>
 </div>
 
 <div style="clear:both;"></div>
@@ -303,8 +304,6 @@ It is possible to decode gratings orientation from neural response using spike c
   <p><strong>Figure 9:</strong> SVM and Logistic Regression confusion matrices for static gratings.</p>
 </div>
 
-### Table 3: Classification accuracy for static gratings.
-
 <div align="center">
 <table>
   <tr>
@@ -324,11 +323,11 @@ It is possible to decode gratings orientation from neural response using spike c
     <td>0.8889</td>
   </tr>
 </table>
+  <p><strong>Table 3:</strong> Classification accuracy for static gratings.
+  </p>
 </div>
 
 Feature selection for static gratings is visualized in Figure 7a in Appendix A. The confusion matrices for Random Forest, SVM, and Logistic Regression models for static gratings are presented in Figures 8a and 9 in Appendix A.
-
-### Table 4: Classification accuracy for drifting gratings.
 
 <div align="center">
 <table>
@@ -349,6 +348,8 @@ Feature selection for static gratings is visualized in Figure 7a in Appendix A. 
     <td>1.0000</td>
   </tr>
 </table>
+  <p><strong>Table 4:</strong> Classification accuracy for drifting gratings.
+  </p>
 </div>
 
 Feature selection for drifting gratings is visualized in Figure 7b in Appendix A. The confusion matrices for Random Forest, SVM, and Logistic Regression models for drifting gratings are presented in Figures 8b and 10 in Appendix A.
