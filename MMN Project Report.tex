@@ -2,7 +2,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{booktabs}
-\usepackage[margin=0.55in, top=0.2in, bottom=0.47in]{geometry}
+\usepackage[margin=0.6in, top=0.2in, bottom=0.55in]{geometry}
 \usepackage{authblk}
 \usepackage{hyperref}
 \usepackage{float}
@@ -31,6 +31,7 @@
 \begin{document}
 
 \maketitle
+\thispagestyle{empty}
 \pagestyle{empty}
 
 \begin{abstract}
@@ -58,19 +59,13 @@ We identify and select a highly selective subset of units with \(\textrm{OSI} > 
 
 \subsection{Static}
 
-Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the \texttt{VISal} and \texttt{VISl} areas [Table \ref{tab:chosen-regions-static}].  The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain.
-
+Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the \texttt{VISal} and \texttt{VISl} areas [Table \ref{tab:chosen-regions-static}].  The anatomical distribution of these neurons aligns with established literature on the hierarchical organization of orientation processing in the mouse brain. 
 Visualization of orientation tuning curves from representative neurons [Figure \ref{fig:static_tuning}] reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and neurons with a broader reaction to different orientations.
-
 The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli [Figure \ref{fig:static_tuning}].
 
 \subsection{Drifting}
 
-Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in \texttt{VISal}, bar one which was in \texttt{grey} [Table \ref{tab:chosen-regions-drifting}].
-
-A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°.
-
-The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
+Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in \texttt{VISal}, bar one which was in \texttt{grey} [Table \ref{tab:chosen-regions-drifting}]- A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°. The tuning curves for drifting stimuli [Figure \ref{fig:drifting_tuning}] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
 
 \begin{figure}[h]
   \centering
@@ -121,15 +116,7 @@ The distribution of well-tuned neurons across brain regions is very similar, wit
 
 \section{Limitations and Further Work}
 
-Comparing model performance between static and drifting gratings is limited by the high discrepancy in resolution: static has 30° and while 45° in drifting. Further study should eliminate this discrepancy. However, this does not limit comparative analysis for OSI as this uses orthogonal values for stimulus count, the same for both. 
-
-Our decoder results are further limited by the small number of presentations per orientation. 20 and 5 for static and drifting respectively. 
-
-This investigation was limited to a single session, for a mouse. Repeating the study with other sessions would validate results.
-
-Additionally, our analysis relied solely on mean firing rates across trials, which may overlook informative temporal response patterns that could enhance decoding performance or reveal finer aspects of orientation encoding.
-
-Finally, another limitation lies in the nature of the stimulus gratings. For static gratings the spatial frequencies and phases also vary while in drifting the temporal frequency varies. More stringent analysis should control these variables and keep them constant over presentations. 
+Comparing model performance between static and drifting gratings is limited by the high discrepancy in resolution: static has 30° and while 45° in drifting. Further study should eliminate this discrepancy. However, this does not limit comparative analysis for OSI as this uses orthogonal values for stimulus count, the same for both. Our decoder results are further limited by the small number of presentations per orientation. 20 and 5 for static and drifting respectively. This investigation was limited to a single session, for a mouse. Repeating the study with other sessions would validate results. Additionally, our analysis relied solely on mean firing rates across trials, which may overlook informative temporal response patterns that could enhance decoding performance or reveal finer aspects of orientation encoding. Finally, another limitation lies in the nature of the stimulus gratings. For static gratings the spatial frequencies and phases also vary while in drifting the temporal frequency varies. More stringent analysis should control these variables and keep them constant over presentations. 
 
 \section{Conclusion}
 
