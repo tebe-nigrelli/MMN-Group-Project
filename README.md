@@ -10,13 +10,47 @@ We analyze ecephys data from the Allen Brain Observatory [1] to investigate how 
 
 ## Data Processing
 
-For our analysis, we chose $750332458$ for its balanced distribution of units across regions of the brain, and for its coverage of the visual cortex [Table 1].  This dataset consists of time-aligned responses of neuronal units to stimuli.
+For our analysis, we chose $750332458$ for its balanced distribution of units across regions of the brain, and for its coverage of the visual cortex.  This dataset consists of time-aligned responses of neuronal units to stimuli.
+
+<div align="center">
+<table>
+  <tr>
+    <th>region</th>
+    <th>Total</th>
+    <th>Static</th>
+    <th>Drifting</th>
+  </tr>
+  <tr><td>grey</td><td>558</td><td>1</td><td>1</td></tr>
+  <tr><td>VISal</td><td>71</td><td>15</td><td>29</td></tr>
+  <tr><td>VISp</td><td>63</td><td>9</td><td>19</td></tr>
+  <tr><td>VISam</td><td>60</td><td>6</td><td>13</td></tr>
+  <tr><td>VISrl</td><td>44</td><td>2</td><td>9</td></tr>
+  <tr><td>VISl</td><td>38</td><td>10</td><td>10</td></tr>
+  <tr><td>VISpm</td><td>19</td><td>0</td><td>2</td></tr>
+  <tr><td>CA1</td><td>16</td><td>0</td><td>0</td></tr>
+  <tr><td>CA3</td><td>15</td><td>0</td><td>0</td></tr>
+  <tr><td>DG</td><td>7</td><td>0</td><td>0</td></tr>
+</table>
+<p>Distribution of units across brain regions for all conditions: total, static gratings, and drifting gratings.</p>
+</div>
+
 
 In this study we look at static and drifting grating presentations, and consider as the variable only the orientation and as the response only the mean firing rate of individual units over each presentation.
 
+<div style="display: flex; justify-content: center; gap: 20px;">
+  <div style="text-align: center; width: 48%;">
+    <img src="report_images/unit_firing_rate_statistics.png" style="width: 100%;">
+    <p>Firing rate statistics across brain regions.</p>
+  </div>
+  <div style="text-align: center; width: 48%;">
+    <img src="report_images/unit_firing_rate_statistics_single.png" style="width: 100%;">
+    <p>Individual firing rate statistics for each brain region.</p>
+  </div>
+</div>
+
 ## Exploratory Data Analysis
 
-We observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region [Figure 1], though some qualitative differences can be identified. As some regions contain little data, spread is subject to noise [Figure 2].
+We observe how spiking rate varies between regions: in general, we notice a linear relation between the log of the mean and the log of the standard deviation of the firing rates. Visually, it is clear that simply observing mean and standard deviation is not enough to characterize the brain region, though some qualitative differences can be identified. As some regions contain little data, spread is subject to noise.
 
 ## Selection of Neurons
 
@@ -26,24 +60,60 @@ $$\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\the
 
 where $r_\alpha$ is the average firing rate of a unit over presentations with orientation $\alpha$, $\theta^* = \arg\max_\theta r_\theta$ is the orientation that elicits the maximum firing rate, and $\bar{\theta} = \theta^* + 90^\circ$ (modulo 180°) is the orientation orthogonal to $\theta^*$.
 
+<div align="center">
+  <div style="width:48%; float:left;">
+    <img src="report_images/tuning_curves_comparison.png" width="100%">
+    <p>Tuning curves: static vs. drifting.</p>
+  </div>
+  <div style="width:48%; float:right;">
+    <img src="report_images/tuned_neurons_region.png" width="100%">
+    <p>Orientation-selective neurons by region.</p>
+  </div>
+  <div style="clear:both;"></div>
+  <p>Comparison of Static and Drifting responses for orientation-selective neurons.</p>
+</div>
+
 We identify and select a highly selective subset of units with $\textrm{OSI} > .5$.  Furthermore, we select units which have unequal firing rates throughout orientations with a one-way ANOVA test ($\alpha = 0.05$).  Finally, we narrow the list of units we look at to those which both have high OSI values and for those which have an unequal distribution.
+
+<div align="center">
+  <div style="width:48%; float:left;">
+    <img src="report_images/spike_mean_comparison.png" width="100%">
+    <p>Spike mean: static, drifting</p>
+  </div>
+  <div style="width:48%; float:right;">
+    <img src="report_images/spike_CV_comparison.png" width="100%">
+    <p>Spike CV: static and drifting</p>
+  </div>
+  <div style="clear:both;"></div>
+  <p>Comparison of spike mean and coefficient of variation between static and drifting gratings.</p>
+</div>
 
 ### Static
 
 Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the `VISal` and `VISl` areas [Table 2].  
-Visualization of orientation tuning curves from representative neurons [Figure 3] reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and neurons with a broader reaction to different orientations.
-The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli [Figure 3].
+Visualization of orientation tuning curves from representative neurons reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and neurons with a broader reaction to different orientations.
+The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli.
+
+<div align="center">
+  <img src="report_images/static_tuning_curves.png" width="100%">
+  <p>Tuning curves for static gratings.</p>
+</div>
 
 ### Drifting
 
-Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in `VISal` [3], bar one which was in `grey` [Table 2]. A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°. The tuning curves for drifting stimuli [Figure 4] conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
+Our approach when looking at drifting stimuli, instead revealed 81 units -- almost double -- with overall higher OSI values (many between 0.8-1.0, as opposed to 0.5-0.7 observed for static stimuli). Similarly, the overwhelming majority were located in the visual cortex, predominantly in `VISal` [3], bar one which was in `grey`. A fundamental difference between presentations of static and drifting stimuli is that static stimuli are shown in orientations in increments of 30° up to 150°, whereas drifting stimuli are shown in orientations in increments of 45°, covering the full 360°. The tuning curves for drifting stimuli conveyed similarly diverse response profiles, but with more pronounced peaks around the preferred orientation, likely exasperated by the wider coverage of each orientation due to the 45° increment.
+
+<div align="center">
+  <img src="report_images/Drifting_tuning_curves.png" width="100%">
+  <p>Tuning curves for drifting gratings.</p>
+</div>
+
+One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart. This behaviour suggests these units are more responsive to orinetation than direction of the drifting grating.
 
 <div align="center">
   <img src="report_images/drifting_unit_mean_orientation.png" width="60%">
-  <p><strong>Figure 1:</strong> Mean orientation preference of drifting units</p>
+  <p>Mean orientation preference of drifting units</p>
 </div>
-
-One interesting phenomenon is the existence of units which show a response to orientations which are 180° apart [Figure 1].  This behaviour suggests these units are more responsive to orinetation than direction of the drifting grating.
 
 For this, we define the Direction Sensitivity Index (DSI) [4], which is the same as the OSI, but where $\bar\theta$ is opposite to $\theta^*$ as opposed to orthogonal.  Only 8 units exhibited a DSI value greater than 0.5, which supports our hypothesis that more units are correlated to orientation than to the drifting itself.
 
@@ -60,7 +130,7 @@ For static, all models performed with accuracy near 0.85 [Table 3], while drifti
 
 ### Cross condition analysis between static and drifting stimuli
 
-At this point we wanted to dig deeper into the difference in OSI between static and drifting gratings by looking at the distribution of the OSI values [Figure 5].
+At this point we wanted to dig deeper into the difference in OSI between static and drifting gratings by looking at the distribution of the OSI values.
 
 <div align="center">
 <table>
@@ -88,9 +158,22 @@ Drifting activates more neurons with high OSI overall.
 
 Static distribution has higher kurtosis (5.009 > 3.397) indicating a narrower sharper peak and heavier tails than drifting. This suggests fewer relatively higher tuned neurons: the drifting nature of the grating is a kind of noise which triggers a greater response. Interestingly we see these results in the feature selection of our random forest models for static and drifting. For static fewer units make up a relatively much larger impact on the models decision than for drifting gratings. As for drifting many units have a high OSI value.
 
+<div align="center">
+  <div style="width:48%; float:left;">
+    <img src="report_images/static_feature_selection.png" width="100%">
+    <p>Static gratings</p>
+  </div>
+  <div style="width:48%; float:right;">
+    <img src="report_images/drifting_feature_selection.png" width="100%">
+    <p>Drifting gratings</p>
+  </div>
+  <div style="clear:both;"></div>
+  <p>Feature selection results for static and drifting gratings.</p>
+</div>
+
 #### Distribution and Overlap of Selective Neurons Across Regions
 
-The distribution of well-tuned neurons across brain regions is very similar, with approximately twice as many well-tuned neurons for drifting compared to static gratings [Figure 6]. Notably, VISl appears to have greater relative importance for static stimuli, whereas VISrl is more prominent for drifting. Furthermore, of the 43 units identified as significant for static gratings, 29 were also significant for drifting gratings. This substantial overlap indicates that many of the same neurons are involved in processing orientation for both stimulus types, which aligns with expectations.
+The distribution of well-tuned neurons across brain regions is very similar, with approximately twice as many well-tuned neurons for drifting compared to static gratings. Notably, VISl appears to have greater relative importance for static stimuli, whereas VISrl is more prominent for drifting. Furthermore, of the 43 units identified as significant for static gratings, 29 were also significant for drifting gratings. This substantial overlap indicates that many of the same neurons are involved in processing orientation for both stimulus types, which aligns with expectations.
 
 ## Limitations and Further Work
 
@@ -117,90 +200,21 @@ It is possible to decode gratings orientation from neural response using spike c
 ## Appendix
 
 <div align="center">
-<table>
-  <tr>
-    <th>region</th>
-    <th>Total</th>
-    <th>Static</th>
-    <th>Drifting</th>
-  </tr>
-  <tr><td>grey</td><td>558</td><td>1</td><td>1</td></tr>
-  <tr><td>VISal</td><td>71</td><td>15</td><td>29</td></tr>
-  <tr><td>VISp</td><td>63</td><td>9</td><td>19</td></tr>
-  <tr><td>VISam</td><td>60</td><td>6</td><td>13</td></tr>
-  <tr><td>VISrl</td><td>44</td><td>2</td><td>9</td></tr>
-  <tr><td>VISl</td><td>38</td><td>10</td><td>10</td></tr>
-  <tr><td>VISpm</td><td>19</td><td>0</td><td>2</td></tr>
-  <tr><td>CA1</td><td>16</td><td>0</td><td>0</td></tr>
-  <tr><td>CA3</td><td>15</td><td>0</td><td>0</td></tr>
-  <tr><td>DG</td><td>7</td><td>0</td><td>0</td></tr>
-</table>
-<p><strong>Table 1, 2, and 3 combined:</strong> Distribution of units across brain regions for all conditions: total, static gratings, and drifting gratings.</p>
-</div>
-
-<div style="display: flex; justify-content: center; gap: 20px;">
-  <div style="text-align: center; width: 48%;">
-    <img src="report_images/unit_firing_rate_statistics.png" style="width: 100%;">
-    <p><strong>Figure 2:</strong> Firing rate statistics across brain regions.</p>
-  </div>
-  <div style="text-align: center; width: 48%;">
-    <img src="report_images/unit_firing_rate_statistics_single.png" style="width: 100%;">
-    <p><strong>Figure 3:</strong> Individual firing rate statistics for each brain region.</p>
-  </div>
-</div>
-
-<div align="center">
-  <div style="width:48%; float:left;">
-    <img src="report_images/spike_mean_comparison.png" width="100%">
-    <p><strong>Figure 4a:</strong> Spike mean: static, drifting</p>
-  </div>
-  <div style="width:48%; float:right;">
-    <img src="report_images/spike_CV_comparison.png" width="100%">
-    <p><strong>Figure 4b:</strong> Spike CV: static and drifting</p>
-  </div>
-  <div style="clear:both;"></div>
-  <p><strong>Figure 4:</strong> Comparison of spike mean and coefficient of variation between static and drifting gratings.</p>
-</div>
-
-<div align="center">
-  <img src="report_images/static_tuning_curves.png" width="100%">
-  <p><strong>Figure 5:</strong> Tuning curves for static gratings.</p>
-</div>
-
-<div align="center">
-  <img src="report_images/Drifting_tuning_curves.png" width="100%">
-  <p><strong>Figure 6:</strong> Tuning curves for drifting gratings.</p>
-</div>
-
-<div align="center">
-  <div style="width:48%; float:left;">
-    <img src="report_images/static_feature_selection.png" width="100%">
-    <p><strong>Figure 7a:</strong> Static gratings</p>
-  </div>
-  <div style="width:48%; float:right;">
-    <img src="report_images/drifting_feature_selection.png" width="100%">
-    <p><strong>Figure 7b:</strong> Drifting gratings</p>
-  </div>
-  <div style="clear:both;"></div>
-  <p><strong>Figure 7:</strong> Feature selection results for static and drifting gratings.</p>
-</div>
-
-<div align="center">
   <div style="width:48%; float:left;">
     <img src="report_images/static_random_forest_confusion_matrix.png" width="100%">
-    <p><strong>Figure 8a:</strong> Static gratings</p>
+    <p>Static gratings</p>
   </div>
   <div style="width:48%; float:right;">
     <img src="report_images/drifting_random_forest_confusion_matrix.png" width="100%">
-    <p><strong>Figure 8b:</strong> Drifting gratings</p>
+    <p>Drifting gratings</p>
   </div>
   <div style="clear:both;"></div>
-  <p><strong>Figure 8:</strong> Random Forest confusion matrices for static and drifting gratings.</p>
+  <p>Random Forest confusion matrices for static and drifting gratings.</p>
 </div>
 
 <div align="center">
   <img src="report_images/static_SVM_LogR_confusion_matrix.png" width="100%">
-  <p><strong>Figure 9:</strong> SVM and Logistic Regression confusion matrices for static gratings.</p>
+  <p>SVM and Logistic Regression confusion matrices for static gratings.</p>
 </div>
 
 <div align="center">
@@ -222,7 +236,7 @@ It is possible to decode gratings orientation from neural response using spike c
     <td>0.8889</td>
   </tr>
 </table>
-  <p><strong>Table 3:</strong> Classification accuracy for static gratings.
+  <p>Classification accuracy for static gratings.
   </p>
 </div>
 
@@ -247,7 +261,7 @@ Feature selection for static gratings is visualized in Figure 7a in the Appendix
     <td>1.0000</td>
   </tr>
 </table>
-  <p><strong>Table 4:</strong> Classification accuracy for drifting gratings.
+  <p>Classification accuracy for drifting gratings.
   </p>
 </div>
 
@@ -255,18 +269,6 @@ Feature selection for drifting gratings is visualized in Figure 7b in the Append
 
 <div align="center">
   <img src="report_images/drifting_SVM_LogR_confusion_matrix.png" width="100%">
-  <p><strong>Figure 10:</strong> SVM and Logistic Regression confusion matrices for drifting gratings.</p>
+  <p>SVM and Logistic Regression confusion matrices for drifting gratings.</p>
 </div>
 
-<div align="center">
-  <div style="width:48%; float:left;">
-    <img src="report_images/tuning_curves_comparison.png" width="100%">
-    <p><strong>Figure 11a:</strong> Tuning curves: static vs. drifting.</p>
-  </div>
-  <div style="width:48%; float:right;">
-    <img src="report_images/tuned_neurons_region.png" width="100%">
-    <p><strong>Figure 11b:</strong> Orientation-selective neurons by region.</p>
-  </div>
-  <div style="clear:both;"></div>
-  <p><strong>Figure 11:</strong> Comparison of Static and Drifting responses for orientation-selective neurons.</p>
-</div>
