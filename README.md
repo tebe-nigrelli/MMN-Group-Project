@@ -56,7 +56,7 @@ We observe how spiking rate varies between regions: in general, we notice a line
 
 For selecting units with high sensitivity to orientation differences, we define the Orientation Selectivity Index (OSI) of a unit [2],
 
-$$\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}$$
+$\textrm{OSI} = \frac{r_{\theta^*} - r_{\bar\theta}}{r_{\theta^*} + r_{\bar\theta}}$
 
 where $r_\alpha$ is the average firing rate of a unit over presentations with orientation $\alpha$, $\theta^* = \arg\max_\theta r_\theta$ is the orientation that elicits the maximum firing rate, and $\bar{\theta} = \theta^* + 90^\circ$ (modulo 180°) is the orientation orthogonal to $\theta^*$.
 
@@ -90,7 +90,7 @@ We identify and select a highly selective subset of units with $\textrm{OSI} > .
 
 ### Static
 
-Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the `VISal` and `VISl` areas [Table 2].  
+Our approach when looking at static stimuli yielded 43 units, all located in the Visual Cortex bar one unit in 'grey', specifically the `VISal` and `VISl` areas.  
 Visualization of orientation tuning curves from representative neurons reveals a diverse response profiles, including narrowly tuned neurons with a strong response to one specific orientation, and neurons with a broader reaction to different orientations.
 The variety is likely beneficial to the encoding of orientation in the visual cortex, helping discriminate between different orientations of visual stimuli.
 
@@ -126,7 +126,7 @@ We constructed a feature matrix with stimulus presentations as rows and the spik
 
 ### Classification performance
 
-For static, all models performed with accuracy near 0.85 [Table 3], while drifting performed with near perfect accuracy [Table 4]. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though the existence of resolution changes between static and drifting gratings is possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
+For static, all models performed with accuracy near 0.85, while drifting performed with near perfect accuracy. In both datasets, logistic regression performed best. The difference in performance can be explained by having more orientation-selective features (81 from 43), with these neurons having higher OSI values, though the existence of resolution changes between static and drifting gratings is possibly affecting decoding. Moreover, our model is limited by having 5 stimulus presentations for drifting and 20 for static.
 
 ### Cross condition analysis between static and drifting stimuli
 
@@ -240,7 +240,7 @@ It is possible to decode gratings orientation from neural response using spike c
   </p>
 </div>
 
-Feature selection for static gratings is visualized in Figure 7a in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for static gratings are presented in Figures 8a and 9 in the Appendix.
+Feature selection for static gratings is visualized in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for static gratings are presented in the Appendix.
 
 <div align="center">
 <table>
@@ -265,7 +265,7 @@ Feature selection for static gratings is visualized in Figure 7a in the Appendix
   </p>
 </div>
 
-Feature selection for drifting gratings is visualized in Figure 7b in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for drifting gratings are presented in Figures 8b and 10 in the Appendix.
+Feature selection for drifting gratings is visualized in the Appendix. The confusion matrices for Random Forest, SVM, and Logistic Regression models for drifting gratings are presented in the Appendix.
 
 <div align="center">
   <img src="report_images/drifting_SVM_LogR_confusion_matrix.png" width="100%">
